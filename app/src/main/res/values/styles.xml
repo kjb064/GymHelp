@@ -30,6 +30,10 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
     </style>
+
+    <style name="AppTheme.Picker" parent="@android:style/Theme.Holo" >
+        <item name="android:textColorPrimary">@android:color/black</item>
+    </style>
 </resources>
 
 

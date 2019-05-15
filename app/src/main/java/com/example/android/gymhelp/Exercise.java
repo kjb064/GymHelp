@@ -35,6 +35,15 @@ public class Exercise {
         date = new Date();
     }
 
+    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, int imageResourceID){
+        this.exerciseID = exerciseID;
+        this.exerciseName = exerciseName;
+        this.setsAndReps = setsAndReps;
+        this.recentWeight = recentWeight;
+        this.imageResourceID = imageResourceID;
+        date = new Date();
+    }
+
     public int getExerciseID(){
         return this.exerciseID;
     }
