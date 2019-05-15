@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GymHelp</string>
+    <string name="cutting_btn">Cutting</string>
+    <string name="bulking_btn">Bulking</string>
+</resources>
