@@ -10,14 +10,16 @@ public class Exercise {
     private int NO_IMAGE_PROVIDED = -1;
     private int imageResourceID = NO_IMAGE_PROVIDED;
     private int recentWeight = 0;
+    private int exerciseTarget;
     private Date date;
 
     // MAY HAVE TO CHANGE HOW recentWeight is initialized
-    public Exercise(String exerciseName, String setsAndReps, int imageID, int recentWeight){
+    public Exercise(String exerciseName, String setsAndReps, int imageID, int recentWeight, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.imageResourceID = imageID;
         this.recentWeight = recentWeight;
+        this.exerciseTarget = exerciseTarget;
         date = new Date();
     }
 
@@ -79,4 +81,8 @@ public class Exercise {
     public Date getDate() {
         return date;
     }
+
+    public int getExerciseTarget(){ return this.exerciseTarget; }
+
+    public void setExerciseTarget(int target){ this.exerciseTarget = target; }
 }

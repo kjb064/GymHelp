@@ -31,6 +31,7 @@
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
     </style>
 
+    <!-- Style for the NumberPicker for selecting weight. Uses the Holo theme with black text. -->
     <style name="AppTheme.Picker" parent="@android:style/Theme.Holo" >
         <item name="android:textColorPrimary">@android:color/black</item>
     </style>
