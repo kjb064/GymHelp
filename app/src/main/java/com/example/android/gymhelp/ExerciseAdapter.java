@@ -18,7 +18,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
 
     private int backgroundColor;
 
-    public ExerciseAdapter(Activity context, ArrayList<Exercise> exercises, int color) {
+    public ExerciseAdapter(Context context, ArrayList<Exercise> exercises, int color) {
         // Here, we initialize the ArrayAdapter's internal storage for the context and the list.
         // the second argument is used when the ArrayAdapter is populating a single TextView.
         // Because this is a custom adapter, the adapter is not
@@ -61,7 +61,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         weightTextView.setText("Weight: " + Integer.toString(currentExercise.getRecentWeight()) + " lbs.");
 
         // Find the ImageView in the list_item.xml layout with the ID "image"
-        ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
+/*        ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImage()){
             // Get the image resource ID from the current AndroidFlavor object and
@@ -75,7 +75,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             // otherwise, hide the ImageView
             iconView.setVisibility(View.GONE);
         }
-
+*/
         // Set the theme color for the list item
         View textContainer = listItemView.findViewById(R.id.text_container);
 

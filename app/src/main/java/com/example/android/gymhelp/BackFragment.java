@@ -1,47 +1,50 @@
 package com.example.android.gymhelp;
 
-import android.content.Context;
+
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class CuttingActivity extends AppCompatActivity{
+/**
+ * A simple {@link Fragment} subclass.
+ */
+public class BackFragment extends Fragment {
+
+
+    public BackFragment() {
+        // Required empty public constructor
+    }
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        final View rootView = inflater.inflate(R.layout.exercise_list, container, false);
 
-        setContentView(R.layout.activity_category);
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, new ChestFragment()).commit();
-
-
-        /*setContentView(R.layout.exercise_list);
-
-        final DatabaseHelper db = new DatabaseHelper(this);
-        ArrayList<Exercise> ex = db.getCuttingTableData();
+        final DatabaseHelper db = new DatabaseHelper(getActivity());
+        ArrayList<Exercise> ex = db.getBackExercises();
 
         // Create an {@link ArrayAdapter}, whose data source is a list of Strings. The
         // adapter knows how to create layouts for each item in the list, using the
         // simple_list_item_1.xml layout resource defined in the Android framework.
         // This list item layout contains a single {@link TextView}, which the adapter will set to
         // display a single word.
-        final ExerciseAdapter adapter = new ExerciseAdapter(this, ex, R.color.cutting_color);
+        final ExerciseAdapter adapter = new ExerciseAdapter(getActivity(), ex, R.color.cutting_color);
 
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml file.
-        final ListView listView = (ListView) findViewById(R.id.list);
+        final ListView listView = (ListView) rootView.findViewById(R.id.list);
 
         // Make the {@link ListView} use the {@link ArrayAdapter} we created above, so that the
         // {@link ListView} will display list items for each word in the list of words.
@@ -55,7 +58,7 @@ public class CuttingActivity extends AppCompatActivity{
 
                 final Exercise ex = (Exercise) listView.getAdapter().getItem(position);
 
-                final AlertDialog.Builder builder = new AlertDialog.Builder(CuttingActivity.this);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(ex.getExerciseName());
 
                 LayoutInflater inflater = getLayoutInflater();
@@ -77,8 +80,8 @@ public class CuttingActivity extends AppCompatActivity{
                     public void onClick(DialogInterface dialog, int which) {
                         int weight = picker.getValue();
                         db.updateExerciseWeight(ex.getExerciseID(), weight);
-                        finish();
-                        startActivity(getIntent());
+                        getActivity().finish();
+                        startActivity(getActivity().getIntent());
                     }
                 });
                 builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
@@ -91,6 +94,8 @@ public class CuttingActivity extends AppCompatActivity{
                 builder.show();
             }
         });
-*/
-    } // end onCreate
+
+        return rootView;
+    }
+
 }

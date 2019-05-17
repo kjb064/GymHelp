@@ -31,10 +31,31 @@
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
     </style>
 
+    <!-- Style for a tab that displays a category name -->
+    <style name="CategoryTab" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@android:color/white</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+        <!--<item name="tabTextAppearance">@style/CategoryTabTextAppearance</item>-->
+    </style>
+
+    <!-- Text appearance style for a category tab -->
+    <style name="CategoryTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textColor">#A8A19E</item>
+    </style>
+
     <!-- Style for the NumberPicker for selecting weight. Uses the Holo theme with black text. -->
-    <style name="AppTheme.Picker" parent="@android:style/Theme.Holo" >
+    <style name="AppTheme.Picker" parent="@android:style/Theme.Holo">
         <item name="android:textColorPrimary">@android:color/black</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
 
 

@@ -16,16 +16,36 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
+        <!--<activity
             android:name=".CuttingActivity"
             android:label="Cutting"
             android:parentActivityName=".MainActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
+
+            &lt;!&ndash; Parent activity meta-data to support 4.0 and lower &ndash;&gt;
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
+        <activity
+            android:name=".ChestActivity"
+            android:label="@string/title_activity_chest"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".BackActivity"
+            android:label="@string/title_activity_back"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".LegsActvity"
+            android:label="@string/title_activity_legs_actvity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ArmsActivity"
+            android:label="@string/title_activity_arms"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ShouldersActivity"
+            android:label="@string/title_activity_shoulders"
+            android:theme="@style/AppTheme.NoActionBar"></activity>-->
     </application>
 
 </manifest>
