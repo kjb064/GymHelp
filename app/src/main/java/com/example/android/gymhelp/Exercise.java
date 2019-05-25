@@ -7,17 +7,21 @@ public class Exercise {
     private int exerciseID;
     private String exerciseName = "";
     private String setsAndReps = "";
-    private int NO_IMAGE_PROVIDED = -1;
-    private int imageResourceID = NO_IMAGE_PROVIDED;
+    //private int NO_IMAGE_PROVIDED = -1;
+    //private int imageResourceID = NO_IMAGE_PROVIDED;
+
+    private String NO_IMAGE_PROVIDED = "NONE";
+    private String imageResourceName = NO_IMAGE_PROVIDED;
+
     private int recentWeight = 0;
     private int exerciseTarget;
     private Date date;
 
     // MAY HAVE TO CHANGE HOW recentWeight is initialized
-    public Exercise(String exerciseName, String setsAndReps, int imageID, int recentWeight, int exerciseTarget){
+    public Exercise(String exerciseName, String setsAndReps, String imageResourceName, int recentWeight, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
-        this.imageResourceID = imageID;
+        this.imageResourceName = imageResourceName;
         this.recentWeight = recentWeight;
         this.exerciseTarget = exerciseTarget;
         date = new Date();
@@ -37,12 +41,12 @@ public class Exercise {
         date = new Date();
     }
 
-    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, int imageResourceID){
+    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, String imageResourceName){
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
-        this.imageResourceID = imageResourceID;
+        this.imageResourceName = imageResourceName;
         date = new Date();
     }
 
@@ -62,21 +66,27 @@ public class Exercise {
         return setsAndReps;
     }
 
-    public int getImageResourceID() {
-        return imageResourceID;
-    }
+    //public int getImageResourceID() {
+    //    return imageResourceID;
+    //}
+
+    public String getImageResourceName(){ return this.imageResourceName; }
 
     public int getRecentWeight() {
         return recentWeight;
     }
 
-    public void setImageResourceID(int id){
-        this.imageResourceID = id;
-    }
+    //public void setImageResourceID(int id){
+    //    this.imageResourceID = id;
+    //}
 
-    public boolean hasImage() {
-        return imageResourceID != NO_IMAGE_PROVIDED;
-    }
+    public void setImageResourceName(String name){ this.imageResourceName = name; }
+
+    //public boolean hasImage() {
+    //    return imageResourceID != NO_IMAGE_PROVIDED;
+    //}
+
+    public boolean hasImage() { return ! imageResourceName.equals(NO_IMAGE_PROVIDED); }
 
     public Date getDate() {
         return date;
