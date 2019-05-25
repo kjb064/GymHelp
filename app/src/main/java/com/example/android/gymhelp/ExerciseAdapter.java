@@ -2,9 +2,11 @@ package com.example.android.gymhelp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,9 @@ import java.util.ArrayList;
 public class ExerciseAdapter extends ArrayAdapter<Exercise> {
 
     private int backgroundColor;
+    private Context context;
+    private Resources resources;
+    private int imageID;
 
     public ExerciseAdapter(Context context, ArrayList<Exercise> exercises, int color) {
         // Here, we initialize the ArrayAdapter's internal storage for the context and the list.
@@ -25,6 +30,8 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // going to use this second argument, so it can be any value. Here, we used 0.
         super(context, 0, exercises);
         backgroundColor = color;
+        this.context = context;
+        this.resources = context.getResources();
     }
 
     @NonNull
@@ -61,12 +68,15 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         weightTextView.setText("Weight: " + Integer.toString(currentExercise.getRecentWeight()) + " lbs.");
 
         // Find the ImageView in the list_item.xml layout with the ID "image"
-/*        ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
+       ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImage()){
             // Get the image resource ID from the current AndroidFlavor object and
             // set the image to iconView
-            iconView.setImageResource(currentExercise.getImageResourceID());
+            Log.d("well hello", "Image ID: " + currentExercise.getImageResourceName() + " for " + currentExercise.getExerciseName());
+            imageID = resources.getIdentifier(currentExercise.getImageResourceName(),
+                    "drawable", context.getPackageName() );
+            iconView.setImageResource(imageID);
 
             // explicitly set it to visible
             iconView.setVisibility(View.VISIBLE);
@@ -75,7 +85,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             // otherwise, hide the ImageView
             iconView.setVisibility(View.GONE);
         }
-*/
+
         // Set the theme color for the list item
         View textContainer = listItemView.findViewById(R.id.text_container);
 
