@@ -71,9 +71,9 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
        ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImage()){
-            // Get the image resource ID from the current AndroidFlavor object and
+            // Get the image resource name from the current Exercise object and
             // set the image to iconView
-            Log.d("well hello", "Image ID: " + currentExercise.getImageResourceName() + " for " + currentExercise.getExerciseName());
+
             imageID = resources.getIdentifier(currentExercise.getImageResourceName(),
                     "drawable", context.getPackageName() );
             iconView.setImageResource(imageID);
@@ -95,7 +95,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // Set the background color of the text_container view
         textContainer.setBackgroundColor(color);
 
-        // Return the whole list item layout (containing 2 TextViews and ImageView)
+        // Return the whole list item layout
         // so that it can be shown in the ListView
         return listItemView;
     }
