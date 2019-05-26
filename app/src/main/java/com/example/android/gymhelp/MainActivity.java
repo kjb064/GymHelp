@@ -1,12 +1,17 @@
 package com.example.android.gymhelp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,8 +66,28 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickAddButton(View view){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        String tabName = (String) adapter.getPageTitle(tabLayout.getSelectedTabPosition());
+        int tabPosition = tabLayout.getSelectedTabPosition();
+        String tabName = (String) adapter.getPageTitle(tabPosition);
         builder.setTitle("Add new " + tabName + " exercise");
+
+        LayoutInflater inflater = getLayoutInflater();
+        final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+
+        builder.setView(dialoglayout);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();   // REMOVE!!!
+            }
+        });
+
+        builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
         builder.show();
     }
 }

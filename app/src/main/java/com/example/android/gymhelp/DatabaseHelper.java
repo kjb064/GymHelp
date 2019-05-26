@@ -256,7 +256,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insert(TABLE_NAME, null, values);
         }
 
-    }
+    } // end onCreate
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -421,6 +421,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String sql = "UPDATE cutting SET weight = " + weight + " WHERE ID = " + exerciseID + ";";
         db.execSQL(sql);
+    }
+
+    public void addExercise(String name, String setsAndReps, int exerciseTarget){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("name", name);
+        values.put("weight", 0);
+        values.put("sets", setsAndReps);
+        values.put("date", DEFAULT_DATE);
+        //values.put("image", imageResourceName);
+        values.put("target", exerciseTarget);
+        db.insert(TABLE_NAME, null, values);
     }
 
 }
