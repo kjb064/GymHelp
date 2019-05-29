@@ -39,7 +39,7 @@ public class ShouldersFragment extends Fragment {
         // simple_list_item_1.xml layout resource defined in the Android framework.
         // This list item layout contains a single {@link TextView}, which the adapter will set to
         // display a single word.
-        final ExerciseAdapter adapter = new ExerciseAdapter(getActivity(), ex, R.color.cutting_color);
+        final ExerciseAdapter adapter = new ExerciseAdapter(getActivity(), ex, R.color.title_color);
 
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the

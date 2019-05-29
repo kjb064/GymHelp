@@ -32,4 +32,20 @@
         android:maxLength="300"
         android:maxLines="4"/>
 
+    <Button
+        android:id="@+id/add_photo_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sets_reps_edit_text"
+        android:text="Add Photo"
+        android:onClick="onClickAddPhotoButton"/>
+
+    <Button
+        android:id="@+id/take_photo_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sets_reps_edit_text"
+        android:layout_toRightOf="@id/add_photo_button"
+        android:text="Take Photo"
+        android:onClick="onClickTakePhotoButton"/>
 </RelativeLayout>

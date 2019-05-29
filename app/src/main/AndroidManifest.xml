@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.android.gymhelp">
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false">
+    </uses-feature>
 
     <application
         android:allowBackup="true"
@@ -16,6 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <!--<activity
             android:name=".CuttingActivity"
             android:label="Cutting"

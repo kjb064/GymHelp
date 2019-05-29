@@ -2,6 +2,7 @@ package com.example.android.gymhelp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper myDb;
     private TabLayout tabLayout;
     private TargetAdapter adapter;
+    private final int REQUEST_IMAGE_CAPTURE = 1;
+    private final int PICK_IMAGE = 100;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,20 +52,6 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
 
 
-        /*// Set the content of the activity to use the activity_main.xml layout file
-        setContentView(R.layout.activity_main);
-
-
-        TextView cutting = (TextView) findViewById(R.id.cutting_btn);
-        cutting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent cuttingIntent = new Intent(MainActivity.this, CuttingActivity.class);
-                startActivity(cuttingIntent);
-            }
-        });
-        */
-
     } // end onCreate
 
     public void onClickAddButton(View view){
@@ -88,6 +78,26 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
+
         builder.show();
     }
+
+    public void onClickAddPhotoButton(View view){
+        // Save a selected photo to app...
+        Intent gallery =
+                new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, PICK_IMAGE);
+    } // end onClickAddPhotoButton
+
+    public void onClickTakePhotoButton(View view){
+
+        // hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY); // check that a camera is available on the device...
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+
+    } // end onClickTakePhotoButton
 }

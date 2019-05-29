@@ -47,22 +47,22 @@
         android:id="@+id/toolbar"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:background="?attr/colorPrimary">
+        android:background="@android:color/holo_blue_dark">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
-            android:textColor="@color/title_color"/>
+            android:textColor="@android:color/black"/>
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:background="?attr/colorPrimary"
-            android:textColor="@color/title_color"
-            android:onClick="onClickAddButton"
-            android:text="Add"/>
+            android:layout_gravity="end"
+            android:paddingRight="15dp"
+            android:src="@drawable/baseline_add_black_18dp"
+            android:background="@android:color/holo_blue_dark"
+            android:onClick="onClickAddButton" />
 
     </android.support.v7.widget.Toolbar>
 
@@ -71,9 +71,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/toolbar"
-        android:background="?attr/colorPrimary"
+        android:background="@android:color/holo_blue_dark"
         style="@style/CategoryTab"
-        app:tabTextColor="@color/title_color"/>
+        app:tabTextColor="@android:color/black"
+        app:tabSelectedTextColor="@android:color/black"
+        app:tabIndicatorColor="@android:color/black"/>
 
 
     <android.support.v4.view.ViewPager
