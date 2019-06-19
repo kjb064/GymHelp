@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String WEIGHT = "weight";
     private static final String SETS_REPS = "sets";
     private static final String DATE = "date";
-    //private static final String IMAGE_ID = "image";
+    private static final String IMAGE_PATH = "imagePath";
     private static final String IMAGE_NAME = "image";
     private static final String EXERCISE_TARGET = "target";
 
@@ -34,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 11);     // Most recent version: 11
+        super(context, DATABASE_NAME, null, 12);     // Most recent version: 12
         this.context = context;
     }
 
@@ -47,6 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + SETS_REPS + " TEXT, "
                 + DATE + " TEXT, "
                 + IMAGE_NAME + " TEXT, "
+                + IMAGE_PATH + " TEXT, "
                 + EXERCISE_TARGET + " INTEGER" + ")" );
         //db.execSQL("UPDATE " + TABLE_NAME + " SET date = " + DEFAULT_DATE);
 

@@ -88,6 +88,10 @@ public class MainActivity extends AppCompatActivity {
                 new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, PICK_IMAGE);
+
+        // Do something with selected photo...
+
+
     } // end onClickAddPhotoButton
 
     public void onClickTakePhotoButton(View view){
@@ -98,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
+
+        // Do something with new photo...
+
 
     } // end onClickTakePhotoButton
 }
