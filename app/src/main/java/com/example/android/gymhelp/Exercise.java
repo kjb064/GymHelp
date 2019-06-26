@@ -27,20 +27,20 @@ public class Exercise {
         date = new Date();
     }
 
-    /*public Exercise(String exerciseName, String setsAndReps, int recentWeight){
+    public Exercise(String exerciseName, String setsAndReps, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
-        this.recentWeight = recentWeight;
-    }*/
-
-    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight){
-        this.exerciseID = exerciseID;
-        this.exerciseName = exerciseName;
-        this.setsAndReps = setsAndReps;
-        this.recentWeight = recentWeight;
+        //this.recentWeight = recentWeight;
+        this.exerciseTarget = exerciseTarget;
         date = new Date();
     }
 
+
+
+    /*
+    * This constructor is used by the DatabaseHelper to create Exercise objects for an ArrayList that is passed
+    * to the corresponding "target" fragment.
+    * */
     public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, String imageResourceName){
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
@@ -49,6 +49,8 @@ public class Exercise {
         this.imageResourceName = imageResourceName;
         date = new Date();
     }
+
+
 
     public int getExerciseID(){
         return this.exerciseID;
@@ -86,7 +88,9 @@ public class Exercise {
     //    return imageResourceID != NO_IMAGE_PROVIDED;
     //}
 
-    public boolean hasImage() { return ! imageResourceName.equals(NO_IMAGE_PROVIDED); }
+    public boolean hasImage() {
+        return ! (imageResourceName != null && NO_IMAGE_PROVIDED.equals(imageResourceName));
+    }
 
     public Date getDate() {
         return date;

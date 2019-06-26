@@ -68,7 +68,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         weightTextView.setText("Weight: " + Integer.toString(currentExercise.getRecentWeight()) + " lbs.");
 
         // Find the ImageView in the list_item.xml layout with the ID "image"
-       ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
+        ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImage()){
             // Get the image resource name from the current Exercise object and
@@ -83,6 +83,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         }
         else {
             // otherwise, hide the ImageView
+            Log.d("Hello", "" + currentExercise.getExerciseName() + "  " + currentExercise.hasImage());
             iconView.setVisibility(View.GONE);
         }
 

@@ -2,8 +2,13 @@ package com.example.android.gymhelp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,9 +17,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private TargetAdapter adapter;
     private final int REQUEST_IMAGE_CAPTURE = 1;
     private final int PICK_IMAGE = 100;
+
+    Exercise newExercise;
+    String currentPhotoPath = "";    // name of file saved by camera
+    private String NO_IMAGE_PROVIDED = "NONE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickAddButton(View view){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        int tabPosition = tabLayout.getSelectedTabPosition();
+        final int tabPosition = tabLayout.getSelectedTabPosition();
         String tabName = (String) adapter.getPageTitle(tabPosition);
         builder.setTitle("Add new " + tabName + " exercise");
 
@@ -68,7 +83,38 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();   // REMOVE!!!
+
+                EditText nameEditText = (EditText) dialoglayout.findViewById(R.id.name_edit_text);
+                EditText setsRepsEditText = (EditText) dialoglayout.findViewById(R.id.sets_reps_edit_text);
+
+
+                // Check that both fields have been filled in
+
+                if(nameEditText.getText().toString().isEmpty() || setsRepsEditText.getText().toString().isEmpty()){
+                    Toast.makeText(getApplicationContext(), "All text fields are required.", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    newExercise = new Exercise(nameEditText.getText().toString(),
+                            setsRepsEditText.getText().toString(),
+                            tabPosition);
+
+                    if(!currentPhotoPath.isEmpty()){
+                        newExercise.setImageResourceName(currentPhotoPath);
+                        currentPhotoPath = "";
+                    }
+                    else{
+                        newExercise.setImageResourceName(NO_IMAGE_PROVIDED);
+                    }
+
+
+                    myDb.addExercise(newExercise);
+
+                    // Reset activity so new exercise will appear
+                    finish();
+                    startActivity(getIntent());
+                }
+
+
             }
         });
 
@@ -94,17 +140,59 @@ public class MainActivity extends AppCompatActivity {
 
     } // end onClickAddPhotoButton
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+            // get the bitmap from the file name
+            //Bitmap takenImage = BitmapFactory.decodeFile(currentPhotoPath);
+
+
+        }
+    } // end onActivityResult
+
     public void onClickTakePhotoButton(View view){
 
-        // hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY); // check that a camera is available on the device...
-
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Toast.makeText(this, "Something went wrong. Could not create file.", Toast.LENGTH_SHORT).show();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Log.d("Hello", currentPhotoPath);   // REMOVE
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.gymhelp.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
 
-        // Do something with new photo...
 
 
     } // end onClickTakePhotoButton
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+
+    } // end createImageFile
 }

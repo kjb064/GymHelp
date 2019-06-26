@@ -34,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 12);     // Most recent version: 12
+        super(context, DATABASE_NAME, null, 14);     // Most recent version: 14
         this.context = context;
     }
 
@@ -424,15 +424,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
-    public void addExercise(String name, String setsAndReps, int exerciseTarget){
+    public void addExercise(Exercise newExercise){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("name", name);
+        values.put("name", newExercise.getExerciseName());
         values.put("weight", 0);
-        values.put("sets", setsAndReps);
-        values.put("date", DEFAULT_DATE);
-        //values.put("image", imageResourceName);
-        values.put("target", exerciseTarget);
+        values.put("sets", newExercise.getSetsAndReps());
+
+        values.put("date", DEFAULT_DATE);   // Needs fix
+
+        //if(newExercise.hasImage()){
+            values.put("image", newExercise.getImageResourceName());
+        //}
+
+        values.put("target", newExercise.getExerciseTarget());
         db.insert(TABLE_NAME, null, values);
     }
 
