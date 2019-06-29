@@ -1,5 +1,7 @@
 package com.example.android.gymhelp;
 
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -144,8 +147,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
-            // get the bitmap from the file name
+            // (OLD get the bitmap from the file name
             //Bitmap takenImage = BitmapFactory.decodeFile(currentPhotoPath);
+
+
 
 
         }
@@ -166,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Log.d("Hello", currentPhotoPath);   // REMOVE
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.android.gymhelp.fileprovider",
                         photoFile);
@@ -195,4 +199,5 @@ public class MainActivity extends AppCompatActivity {
         return image;
 
     } // end createImageFile
+
 }

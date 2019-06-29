@@ -22,6 +22,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
     private Context context;
     private Resources resources;
     private int imageID;
+    private String defaultImageName = "baseline_image_black_48dp";
 
     public ExerciseAdapter(Context context, ArrayList<Exercise> exercises, int color) {
         // Here, we initialize the ArrayAdapter's internal storage for the context and the list.
@@ -82,9 +83,9 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             iconView.setVisibility(View.VISIBLE);
         }
         else {
-            // otherwise, hide the ImageView
-            Log.d("Hello", "" + currentExercise.getExerciseName() + "  " + currentExercise.hasImage());
-            iconView.setVisibility(View.GONE);
+            // otherwise, use default image for iconView
+            imageID = resources.getIdentifier(defaultImageName, "drawable", context.getPackageName());
+            iconView.setImageResource(imageID);
         }
 
         // Set the theme color for the list item

@@ -252,7 +252,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("weight", exercises.get(i).getRecentWeight());
             values.put("sets", exercises.get(i).getSetsAndReps());
             values.put("date", DEFAULT_DATE);
-            values.put("image", exercises.get(i).getImageResourceName());
+            //values.put("image", exercises.get(i).getImageResourceName());
             values.put("target", exercises.get(i).getExerciseTarget());
             db.insert(TABLE_NAME, null, values);
         }
@@ -422,7 +422,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String sql = "UPDATE cutting SET weight = " + weight + " WHERE ID = " + exerciseID + ";";
         db.execSQL(sql);
-    }
+    } // end updateExerciseWeight
 
     public void addExercise(Exercise newExercise){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -433,12 +433,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         values.put("date", DEFAULT_DATE);   // Needs fix
 
-        //if(newExercise.hasImage()){
-            values.put("image", newExercise.getImageResourceName());
-        //}
 
+        values.put("image", newExercise.getImageResourceName());
         values.put("target", newExercise.getExerciseTarget());
         db.insert(TABLE_NAME, null, values);
-    }
+
+    } // end addExercise
 
 }

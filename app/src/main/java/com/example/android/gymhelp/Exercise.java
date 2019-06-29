@@ -35,10 +35,20 @@ public class Exercise {
         date = new Date();
     }
 
+    /*
+    *   Used within DatabaseHelper; lacks any image-related parameters
+     */
+    public Exercise(String exerciseName, String setsAndReps, int recentWeight, int exerciseTarget){
+        this.exerciseName = exerciseName;
+        this.setsAndReps = setsAndReps;
+        this.recentWeight = recentWeight;
+        this.exerciseTarget = exerciseTarget;
+    }
+
 
 
     /*
-    * This constructor is used by the DatabaseHelper to create Exercise objects for an ArrayList that is passed
+    * This constructor WAS used by the DatabaseHelper to create Exercise objects for an ArrayList that is passed
     * to the corresponding "target" fragment.
     * */
     public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, String imageResourceName){
