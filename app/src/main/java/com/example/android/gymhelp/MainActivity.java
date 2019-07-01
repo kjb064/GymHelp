@@ -102,11 +102,12 @@ public class MainActivity extends AppCompatActivity {
                             tabPosition);
 
                     if(!currentPhotoPath.isEmpty()){
-                        newExercise.setImageResourceName(currentPhotoPath);
+                        Log.d("Hello", "" + currentPhotoPath);
+                        newExercise.setImageResourcePath(currentPhotoPath);
                         currentPhotoPath = "";
                     }
                     else{
-                        newExercise.setImageResourceName(NO_IMAGE_PROVIDED);
+                        newExercise.setImageResourcePath(NO_IMAGE_PROVIDED);
                     }
 
 
@@ -149,8 +150,6 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             // (OLD get the bitmap from the file name
             //Bitmap takenImage = BitmapFactory.decodeFile(currentPhotoPath);
-
-
 
 
         }

@@ -12,7 +12,7 @@ public class Exercise {
 
     private String NO_IMAGE_PROVIDED = "NONE";
     private String imageResourceName = NO_IMAGE_PROVIDED;
-
+    private String imageResourcePath = NO_IMAGE_PROVIDED;
     private int recentWeight = 0;
     private int exerciseTarget;
     private Date date;
@@ -43,6 +43,7 @@ public class Exercise {
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
         this.exerciseTarget = exerciseTarget;
+        this.imageResourceName = NO_IMAGE_PROVIDED;
     }
 
 
@@ -50,13 +51,16 @@ public class Exercise {
     /*
     * This constructor WAS used by the DatabaseHelper to create Exercise objects for an ArrayList that is passed
     * to the corresponding "target" fragment.
+    *
+    * *********NOTE: Temporarily removed imageResourceName
     * */
-    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, String imageResourceName){
+    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, String imageResourcePath){ //String imageResourceName
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
-        this.imageResourceName = imageResourceName;
+        //this.imageResourceName = imageResourceName;
+        this.imageResourcePath = imageResourcePath;
         date = new Date();
     }
 
@@ -102,6 +106,15 @@ public class Exercise {
         return ! (imageResourceName != null && NO_IMAGE_PROVIDED.equals(imageResourceName));
     }
 
+    public boolean hasImagePath(){
+        if(imageResourcePath != null){
+            return (! NO_IMAGE_PROVIDED.equals(imageResourcePath));
+        }
+        else{
+            return false;
+        }
+    }
+
     public Date getDate() {
         return date;
     }
@@ -109,4 +122,12 @@ public class Exercise {
     public int getExerciseTarget(){ return this.exerciseTarget; }
 
     public void setExerciseTarget(int target){ this.exerciseTarget = target; }
+
+    public void setImageResourcePath(String path){
+        this.imageResourcePath = path;
+    }
+
+    public String getImageResourcePath(){
+        return this.imageResourcePath;
+    }
 }
