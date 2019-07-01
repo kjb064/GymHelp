@@ -3,15 +3,20 @@ package com.example.android.gymhelp;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -20,6 +25,9 @@ import java.util.ArrayList;
  */
 public class LegsFragment extends Fragment {
 
+    private static final int DELETE_ID = Menu.FIRST;
+    private static final int EDIT_ID = Menu.FIRST + 1;
+    ArrayList<Exercise> ex;
 
     public LegsFragment() {
         // Required empty public constructor
@@ -32,7 +40,8 @@ public class LegsFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.exercise_list, container, false);
 
         final DatabaseHelper db = new DatabaseHelper(getActivity());
-        ArrayList<Exercise> ex = db.getLegExercises();
+        db.deleteExercise(5);   //REMOVE!
+        ex = db.getLegExercises();
 
         // Create an {@link ArrayAdapter}, whose data source is a list of Strings. The
         // adapter knows how to create layouts for each item in the list, using the
@@ -45,6 +54,8 @@ public class LegsFragment extends Fragment {
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml file.
         final ListView listView = (ListView) rootView.findViewById(R.id.list);
+
+        registerForContextMenu(listView);
 
         // Make the {@link ListView} use the {@link ArrayAdapter} we created above, so that the
         // {@link ListView} will display list items for each word in the list of words.
@@ -97,6 +108,35 @@ public class LegsFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, DELETE_ID, 0, R.string.menu_delete);
+        menu.add(0, EDIT_ID, 0, R.string.menu_edit);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        DatabaseHelper db = new DatabaseHelper(getActivity());
+
+        switch (item.getItemId()){
+            case DELETE_ID:
+                AdapterView.AdapterContextMenuInfo info =
+                        (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                db.deleteExercise(ex.get((int) info.id).getExerciseID());
+
+                Toast.makeText(getActivity(),
+                        "DELETED " + ex.get((int) info.id).getExerciseID(),
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            case EDIT_ID:
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+
     }
 
 }

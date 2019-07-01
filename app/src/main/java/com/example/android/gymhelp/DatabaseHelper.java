@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 14);     // Most recent version: 14
+        super(context, DATABASE_NAME, null, 15);     // Most recent version: 15
         this.context = context;
     }
 
@@ -68,27 +69,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          */
         exercises.add(new Exercise("Barbell Bench Press - Medium Grip",
                 "5 sets, 15, 12, 10, 10, 10 reps ",
-                resources.getResourceName(R.drawable.bench_press_medium_grip),
+                //resources.getResourceName(R.drawable.bench_press_medium_grip),
                 0,
                 Constants.CHEST) );
         exercises.add(new Exercise("Incline Dumbbell Press",
                 "4 sets, 12, 10, 10, 8 reps ",
-                resources.getResourceEntryName(R.drawable.incline_dumbbell_press),
+                //resources.getResourceEntryName(R.drawable.incline_dumbbell_press),
                 0,
                 Constants.CHEST) );
         exercises.add(new Exercise("Dumbbell Flyes",
                 "4 sets, 10, 10, 10, 10 reps",
-                resources.getResourceEntryName(R.drawable.dumbbell_flyes),
+                //resources.getResourceEntryName(R.drawable.dumbbell_flyes),
                 0,
                 Constants.CHEST));
         exercises.add(new Exercise("Straight-Arm Dumbbell Pullover",
                 "3 sets, 15, 12, 10 reps ",
-                resources.getResourceEntryName(R.drawable.straight_arm_dumbbell_pullover),
+                //resources.getResourceEntryName(R.drawable.straight_arm_dumbbell_pullover),
                 0,
                 Constants.CHEST) );
         exercises.add(new Exercise("Butterfly",
                 "4 sets, 12, 12, 12, 12 reps",
-                resources.getResourceEntryName(R.drawable.butterfly),
+                //resources.getResourceEntryName(R.drawable.butterfly),
                 0,
                 Constants.CHEST) );
 
@@ -99,47 +100,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          */
         exercises.add(new Exercise("Standing Calf Raises",
                 "3 sets, 60, 60, 60 reps",
-                resources.getResourceEntryName(R.drawable.standing_calf_raises),
+                //resources.getResourceEntryName(R.drawable.standing_calf_raises),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Seated Calf Raise",
                 "3 sets, 60, 60, 60 reps",
-                resources.getResourceEntryName(R.drawable.seated_calf_raise),
+                //resources.getResourceEntryName(R.drawable.seated_calf_raise),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Leg Extensions",
                 "5 sets, 15, 12, 12, 10, 10 reps",
-                resources.getResourceEntryName(R.drawable.leg_extensions),
+                //resources.getResourceEntryName(R.drawable.leg_extensions),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Barbell Squat",
                 "5 sets, 20, 15, 12, 10, 10 reps",
-                resources.getResourceEntryName(R.drawable.barbell_squat),
+                //resources.getResourceEntryName(R.drawable.barbell_squat),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Leg Press",
                 "4 sets, 15, 12, 12, 10 reps",
-                resources.getResourceEntryName(R.drawable.leg_press),
+                //resources.getResourceEntryName(R.drawable.leg_press),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Smith Machine Squat",
                 "3 sets, 15, 15, 15 reps",
-                resources.getResourceEntryName(R.drawable.smith_machine_squat),
+                //resources.getResourceEntryName(R.drawable.smith_machine_squat),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Seated Leg Curl",
                 "4 sets, 12, 10, 10, 10 reps",
-                resources.getResourceEntryName(R.drawable.seated_leg_curl),
+                //resources.getResourceEntryName(R.drawable.seated_leg_curl),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Stiff-Legged Barbell Deadlift",
                 "4 sets, 15, 12, 12, 10 reps",
-                resources.getResourceEntryName(R.drawable.stiff_legged_barbell_deadlift),
+                //resources.getResourceEntryName(R.drawable.stiff_legged_barbell_deadlift),
                 0,
                 Constants.LEGS) );
         exercises.add(new Exercise("Dumbbell Lunges",
                 "3 sets, 20 steps",
-                resources.getResourceEntryName(R.drawable.dumbbell_lunges),
+                //resources.getResourceEntryName(R.drawable.dumbbell_lunges),
                 0,
                 Constants.LEGS) );
 
@@ -148,22 +149,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          */
         exercises.add(new Exercise("Wide-Grip Lat Pulldown",
                 "4 sets, 12, 10, 10, 10 reps",
-                resources.getResourceEntryName(R.drawable.wide_grip_lat_pulldown),
+                //resources.getResourceEntryName(R.drawable.wide_grip_lat_pulldown),
                 0,
                 Constants.BACK) );
         exercises.add(new Exercise("Seated Cable Rows",
                 "4 sets, 15, 12, 10, 10 reps",
-                resources.getResourceEntryName(R.drawable.seated_cable_rows),
+                //resources.getResourceEntryName(R.drawable.seated_cable_rows),
                 0,
                 Constants.BACK) );
         exercises.add(new Exercise("Bent Over Barbell Row",
                 "4 sets, 15, 12, 10, 8 reps",
-                resources.getResourceEntryName(R.drawable.bent_over_barbell_row),
+                //resources.getResourceEntryName(R.drawable.bent_over_barbell_row),
                 0,
                 Constants.BACK) );
         exercises.add(new Exercise("One-Arm Dumbbell Row",
                 "4 sets, 15, 10, 10, 8 reps",
-                resources.getResourceEntryName(R.drawable.one_arm_dumbbell_row),
+                //resources.getResourceEntryName(R.drawable.one_arm_dumbbell_row),
                 0,
                 Constants.BACK) );
 
@@ -173,32 +174,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          */
         exercises.add(new Exercise("Standing Military Press",
                 "4 sets, 12, 10, 8, 8 reps",
-                resources.getResourceEntryName(R.drawable.standing_military_press),
+                //resources.getResourceEntryName(R.drawable.standing_military_press),
                 0,
                 Constants.SHOULDERS) );
         exercises.add(new Exercise("Dumbbell Bench Press",
                 "4 sets, 10, 10, 8, 8 reps",
-                resources.getResourceEntryName(R.drawable.dumbbell_bench_press),
+                //resources.getResourceEntryName(R.drawable.dumbbell_bench_press),
                 0,
                 Constants.SHOULDERS) );
         exercises.add(new Exercise("Barbell Shrug",
                 "4 sets, 15, 12, 12, 10 reps",
-                resources.getResourceEntryName(R.drawable.barbell_shrug),
+                //resources.getResourceEntryName(R.drawable.barbell_shrug),
                 0,
                 Constants.SHOULDERS) );
         exercises.add(new Exercise("Smith Machine Shrug",
                 "3 sets, 12, 12, 12 reps",
-                resources.getResourceEntryName(R.drawable.smith_machine_shrug),
+                //resources.getResourceEntryName(R.drawable.smith_machine_shrug),
                 0,
                 Constants.SHOULDERS) );
         exercises.add(new Exercise("Side Lateral Raise",
                 "3 sets, 12, 10, 8 reps per side",
-                resources.getResourceEntryName(R.drawable.side_lateral_raise),
+                //resources.getResourceEntryName(R.drawable.side_lateral_raise),
                 0,
                 Constants.SHOULDERS) );
         exercises.add(new Exercise("Front Plate Raise",
                 "3 sets, 12, 10, 8 reps (25, 35, 45)",
-                resources.getResourceEntryName(R.drawable.front_plate_raise),
+                //resources.getResourceEntryName(R.drawable.front_plate_raise),
                 0,
                 Constants.SHOULDERS) );
 
@@ -208,42 +209,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          */
         exercises.add(new Exercise("Barbell Curl",
                 "4 sets, 12, 10, 10, 8 reps",
-                resources.getResourceEntryName(R.drawable.barbell_curl),
+                //resources.getResourceEntryName(R.drawable.barbell_curl),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("Dumbbell Alternate Bicep Curl",
                 "4 sets, 12, 10, 8, 8 reps",
-                resources.getResourceEntryName(R.drawable.dumbbell_alternate_bicep_curl),
+                //resources.getResourceEntryName(R.drawable.dumbbell_alternate_bicep_curl),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("Standing Dumbbell Reverse Curl",
                 "4 sets, 12, 10, 10, 8 reps",
-                resources.getResourceEntryName(R.drawable.standing_dumbbell_reverse_curl),
+                //resources.getResourceEntryName(R.drawable.standing_dumbbell_reverse_curl),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("One Arm Dumbbell Preacher Curl",
                 "3 sets, 12, 12, 12 reps",
-                resources.getResourceEntryName(R.drawable.one_arm_dumbbell_preacher_curl),
+                //resources.getResourceEntryName(R.drawable.one_arm_dumbbell_preacher_curl),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("Dumbbell One-Arm Triceps Extension",
                 "4 sets, 12, 10, 10, 8 reps",
-                resources.getResourceEntryName(R.drawable.dumbbell_one_arm_triceps_extension),
+                //resources.getResourceEntryName(R.drawable.dumbbell_one_arm_triceps_extension),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("Weighted Bench Dip",
                 "4 sets, 15, 12, 12, 10 reps",
-                resources.getResourceEntryName(R.drawable.weighted_bench_dip),
+                //resources.getResourceEntryName(R.drawable.weighted_bench_dip),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("Lying Triceps Press",
                 "4 sets, 15, 10, 10, 8 reps",
-                resources.getResourceEntryName(R.drawable.lying_triceps_press),
+                //resources.getResourceEntryName(R.drawable.lying_triceps_press),
                 0,
                 Constants.ARMS) );
         exercises.add(new Exercise("Triceps Pushdown",
                 "3 sets, 12, 12, 10 reps",
-                resources.getResourceEntryName(R.drawable.triceps_pushdown),
+                //resources.getResourceEntryName(R.drawable.triceps_pushdown),
                 0,
                 Constants.ARMS) );
 
@@ -268,7 +269,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /*
         (DONE) Will require modification (or new methods) for each fragment under "Cutting"
      */
-    public ArrayList getCuttingTableData(){
+    /*public ArrayList getCuttingTableData(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery("SELECT * FROM cutting ", null);
@@ -286,7 +287,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         c.close();
         return exercises;
-    }
+    } */
 
     public ArrayList getChestExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
@@ -300,8 +301,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int weight = c.getInt(2);
                 String sets = c.getString(3);
                 // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
             }while(c.moveToNext());
         }
 
@@ -321,8 +324,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int weight = c.getInt(2);
                 String sets = c.getString(3);
                 // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
             }while(c.moveToNext());
         }
 
@@ -343,8 +348,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int weight = c.getInt(2);
                 String sets = c.getString(3);
                 // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
             }while(c.moveToNext());
         }
 
@@ -364,8 +371,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int weight = c.getInt(2);
                 String sets = c.getString(3);
                 // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
             }while(c.moveToNext());
         }
 
@@ -385,8 +394,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int weight = c.getInt(2);
                 String sets = c.getString(3);
                 // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
             }while(c.moveToNext());
         }
 
@@ -409,8 +420,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int weight = c.getInt(2);
                 String sets = c.getString(3);
                 // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
             }while(c.moveToNext());
         }
 
@@ -435,9 +448,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
         values.put("image", newExercise.getImageResourceName());
+        values.put("imagePath", newExercise.getImageResourcePath());
+
         values.put("target", newExercise.getExerciseTarget());
         db.insert(TABLE_NAME, null, values);
 
     } // end addExercise
 
+    public void deleteExercise(int exerciseID){
+        Log.d("Delete", "Deleting item pos= " + exerciseID);
+        // TODO:
+            // Check if there's an image associated with the item to delete. If so, delete the image
+            // Then delete the exercise from the table (TEST w/ BELOW)
+
+        //SQLiteDatabase db = this.getWritableDatabase();
+        //db.delete(TABLE_NAME, ID + "=" + exerciseID, null);
+
+    } // end deleteExercise
 }
