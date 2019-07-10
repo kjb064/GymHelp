@@ -4,14 +4,19 @@ package com.example.android.gymhelp;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -20,6 +25,10 @@ import java.util.ArrayList;
  */
 public class BackFragment extends Fragment {
 
+    private static final int DELETE_ID = Menu.FIRST;
+    private static final int EDIT_ID = Menu.FIRST + 1;
+    ArrayList<Exercise> ex;
+    private static final int BACK_GROUP_ID = Constants.BACK;
 
     public BackFragment() {
         // Required empty public constructor
@@ -32,7 +41,7 @@ public class BackFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.exercise_list, container, false);
 
         final DatabaseHelper db = new DatabaseHelper(getActivity());
-        ArrayList<Exercise> ex = db.getBackExercises();
+        ex = db.getBackExercises();
 
         // Create an {@link ArrayAdapter}, whose data source is a list of Strings. The
         // adapter knows how to create layouts for each item in the list, using the
@@ -46,6 +55,8 @@ public class BackFragment extends Fragment {
         // word_list.xml file.
         final ListView listView = (ListView) rootView.findViewById(R.id.list);
 
+        registerForContextMenu(listView);
+
         // Make the {@link ListView} use the {@link ArrayAdapter} we created above, so that the
         // {@link ListView} will display list items for each word in the list of words.
         // Do this by calling the setAdapter method on the {@link ListView} object and pass in
@@ -56,10 +67,10 @@ public class BackFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
-                final Exercise ex = (Exercise) listView.getAdapter().getItem(position);
+                final Exercise exercise = (Exercise) listView.getAdapter().getItem(position);
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(ex.getExerciseName());
+                builder.setTitle(exercise.getExerciseName());
 
                 LayoutInflater inflater = getLayoutInflater();
                 final View dialoglayout = inflater.inflate(R.layout.custom_alertdialog, null);
@@ -79,7 +90,7 @@ public class BackFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         int weight = picker.getValue();
-                        db.updateExerciseWeight(ex.getExerciseID(), weight);
+                        db.updateExerciseWeight(exercise.getExerciseID(), weight);
                         getActivity().finish();
                         startActivity(getActivity().getIntent());
                     }
@@ -97,5 +108,50 @@ public class BackFragment extends Fragment {
 
         return rootView;
     }
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(BACK_GROUP_ID, DELETE_ID, 0, R.string.menu_delete);
+        menu.add(BACK_GROUP_ID, EDIT_ID, 0, R.string.menu_edit);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        if(item.getGroupId() == BACK_GROUP_ID){
+
+            DatabaseHelper db = new DatabaseHelper(getActivity());
+
+            switch (item.getItemId()){
+                case DELETE_ID:
+                    AdapterView.AdapterContextMenuInfo info =
+                            (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+                    int id = ex.get((int) info.id).getExerciseID();
+                    db.deleteExercise(id);
+
+                    Toast.makeText(getActivity(),
+                            "DELETED " + ex.get((int) info.id).getExerciseID(),
+                            Toast.LENGTH_SHORT).show();
+                    ex.remove((int) info.id);
+
+                    // "Refresh" the Fragment once the exercise has been deleted
+                    Fragment currentFragment = getFragmentManager().findFragmentByTag(getTag());
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.detach(currentFragment);
+                    fragmentTransaction.attach(currentFragment);
+                    fragmentTransaction.commit();
+                    return true;
+                case EDIT_ID:
+                    return true;
+                default:
+                    return super.onContextItemSelected(item);
+            }
+
+        }
+        return false;
+    } // end onContextItemSelected
 
 }

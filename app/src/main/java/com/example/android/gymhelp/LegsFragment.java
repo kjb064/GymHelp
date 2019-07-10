@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ public class LegsFragment extends Fragment {
     private static final int DELETE_ID = Menu.FIRST;
     private static final int EDIT_ID = Menu.FIRST + 1;
     ArrayList<Exercise> ex;
+    private static final int LEGS_GROUP_ID = Constants.LEGS;
 
     public LegsFragment() {
         // Required empty public constructor
@@ -40,7 +42,6 @@ public class LegsFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.exercise_list, container, false);
 
         final DatabaseHelper db = new DatabaseHelper(getActivity());
-        db.deleteExercise(5);   //REMOVE!
         ex = db.getLegExercises();
 
         // Create an {@link ArrayAdapter}, whose data source is a list of Strings. The
@@ -67,10 +68,10 @@ public class LegsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
-                final Exercise ex = (Exercise) listView.getAdapter().getItem(position);
+                final Exercise exercise = (Exercise) listView.getAdapter().getItem(position);
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(ex.getExerciseName());
+                builder.setTitle(exercise.getExerciseName());
 
                 LayoutInflater inflater = getLayoutInflater();
                 final View dialoglayout = inflater.inflate(R.layout.custom_alertdialog, null);
@@ -91,7 +92,7 @@ public class LegsFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         int weight = picker.getValue();
-                        db.updateExerciseWeight(ex.getExerciseID(), weight);
+                        db.updateExerciseWeight(exercise.getExerciseID(), weight);
                         getActivity().finish();
                         startActivity(getActivity().getIntent());
                     }
@@ -113,30 +114,45 @@ public class LegsFragment extends Fragment {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0, DELETE_ID, 0, R.string.menu_delete);
-        menu.add(0, EDIT_ID, 0, R.string.menu_edit);
+        menu.add(LEGS_GROUP_ID, DELETE_ID, 0, R.string.menu_delete);
+        menu.add(LEGS_GROUP_ID, EDIT_ID, 0, R.string.menu_edit);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        DatabaseHelper db = new DatabaseHelper(getActivity());
 
-        switch (item.getItemId()){
-            case DELETE_ID:
-                AdapterView.AdapterContextMenuInfo info =
-                        (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                db.deleteExercise(ex.get((int) info.id).getExerciseID());
+        if(item.getGroupId() == LEGS_GROUP_ID){
 
-                Toast.makeText(getActivity(),
-                        "DELETED " + ex.get((int) info.id).getExerciseID(),
-                        Toast.LENGTH_SHORT).show();
-                return true;
-            case EDIT_ID:
-                return true;
-            default:
-                return super.onContextItemSelected(item);
+            DatabaseHelper db = new DatabaseHelper(getActivity());
+
+            switch (item.getItemId()){
+                case DELETE_ID:
+                    AdapterView.AdapterContextMenuInfo info =
+                            (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+                    int id = ex.get((int) info.id).getExerciseID();
+                    db.deleteExercise(id);
+
+                    Toast.makeText(getActivity(),
+                            "DELETED " + ex.get((int) info.id).getExerciseID(),
+                            Toast.LENGTH_SHORT).show();
+                    ex.remove((int) info.id);
+
+                    // "Refresh" the Fragment once the exercise has been deleted
+                    Fragment currentFragment = getFragmentManager().findFragmentByTag(getTag());
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.detach(currentFragment);
+                    fragmentTransaction.attach(currentFragment);
+                    fragmentTransaction.commit();
+                    return true;
+                case EDIT_ID:
+                    return true;
+                default:
+                    return super.onContextItemSelected(item);
+            }
+
         }
-
-    }
+        return false;
+    } // end onContextItemSelected
 
 }

@@ -1,5 +1,7 @@
 package com.example.android.gymhelp;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
@@ -20,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                     // Reset activity so new exercise will appear
                     finish();
                     startActivity(getIntent());
+
                 }
 
 
@@ -151,7 +155,14 @@ public class MainActivity extends AppCompatActivity {
             // (OLD get the bitmap from the file name
             //Bitmap takenImage = BitmapFactory.decodeFile(currentPhotoPath);
 
-
+        }
+        else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
+            /*And the result returns the Uri of the selected picture (an Uri can be
+            regarded as the "address" or an identifier of the picture), which is passed
+            to the ImageView to load and display.*/
+            // EXAMPLE:
+            // Uri imageUri = data.getData();
+            // imageView.setImageURI(imageUri);
         }
     } // end onActivityResult
 

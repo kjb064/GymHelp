@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 15);     // Most recent version: 15
+        super(context, DATABASE_NAME, null, 16);     // Most recent version: 16
         this.context = context;
     }
 
@@ -457,12 +458,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deleteExercise(int exerciseID){
         Log.d("Delete", "Deleting item pos= " + exerciseID);
-        // TODO:
-            // Check if there's an image associated with the item to delete. If so, delete the image
-            // Then delete the exercise from the table (TEST w/ BELOW)
 
-        //SQLiteDatabase db = this.getWritableDatabase();
-        //db.delete(TABLE_NAME, ID + "=" + exerciseID, null);
+        // Check if there's an image associated with the item to delete. If so, delete the image.
+
+        String path = null;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT " + IMAGE_PATH + " FROM " + TABLE_NAME +
+                " WHERE " + ID + " = " + exerciseID + ";", null);
+
+        if(c.moveToFirst()){    // Check if cursor is empty
+            path = c.getString(0);
+        }
+
+        if(path != null){
+            File deleteFile = new File(path);
+            if(deleteFile.delete()){
+                Log.d("Delete", "Successfully deleted file at " + path);
+            }
+            else {
+                Log.d("Delete", "Could not delete file at " + path);
+            }
+        }
+
+        // Then delete the exercise from the table
+
+        if(db.delete(TABLE_NAME, ID + "=" + exerciseID, null) > 0){
+            Log.d("Delete", "Successfully deleted exercise #" + exerciseID);
+        }
+        else{
+            Log.d("Delete", "Could not delete exercise #" + exerciseID);
+        }
 
     } // end deleteExercise
 }
