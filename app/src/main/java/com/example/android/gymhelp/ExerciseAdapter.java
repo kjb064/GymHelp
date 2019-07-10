@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -107,8 +108,16 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             bmOptions.inPurgeable = true;
 
             Bitmap bitmap = BitmapFactory.decodeFile(currentExercise.getImageResourcePath(), bmOptions);
-            iconView.setImageBitmap(bitmap);
-
+            if(bitmap != null){
+                iconView.setImageBitmap(bitmap);
+            }
+            else{
+                // Failed to get image bitmap, use default image
+                imageID = resources.getIdentifier(defaultImageName, "drawable", context.getPackageName());
+                iconView.setImageResource(imageID);
+                Toast.makeText(context, "Could not load image for " + currentExercise.getExerciseName()
+                + " from " + currentExercise.getImageResourcePath(), Toast.LENGTH_LONG).show();
+            }
 
         }
         else {

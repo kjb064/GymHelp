@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -105,14 +106,12 @@ public class MainActivity extends AppCompatActivity {
                             tabPosition);
 
                     if(!currentPhotoPath.isEmpty()){
-                        Log.d("Hello", "" + currentPhotoPath);
                         newExercise.setImageResourcePath(currentPhotoPath);
                         currentPhotoPath = "";
                     }
                     else{
                         newExercise.setImageResourcePath(NO_IMAGE_PROVIDED);
                     }
-
 
                     myDb.addExercise(newExercise);
 
@@ -143,9 +142,6 @@ public class MainActivity extends AppCompatActivity {
                         android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, PICK_IMAGE);
 
-        // Do something with selected photo...
-
-
     } // end onClickAddPhotoButton
 
     @Override
@@ -163,8 +159,20 @@ public class MainActivity extends AppCompatActivity {
             // EXAMPLE:
             // Uri imageUri = data.getData();
             // imageView.setImageURI(imageUri);
+            Uri imageUri = data.getData();
+            currentPhotoPath = getPath(imageUri);
+            Log.d("Path", "" + currentPhotoPath);
         }
     } // end onActivityResult
+
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        startManagingCursor(cursor);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
 
     public void onClickTakePhotoButton(View view){
 
