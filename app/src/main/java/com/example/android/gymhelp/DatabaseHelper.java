@@ -460,6 +460,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("Delete", "Deleting item pos= " + exerciseID);
 
         // Check if there's an image associated with the item to delete. If so, delete the image.
+            // Note: This will ONLY delete an image taken using the "Take Image" button when adding a new
+            // exercise. An image that was already on the device and was added using the "Add Image"
+            // button will remain on the device.
 
         String path = null;
         SQLiteDatabase db = this.getWritableDatabase();
