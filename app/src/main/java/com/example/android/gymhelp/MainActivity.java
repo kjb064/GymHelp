@@ -1,11 +1,13 @@
 package com.example.android.gymhelp;
 
+import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +15,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private TargetAdapter adapter;
     private final int REQUEST_IMAGE_CAPTURE = 1;
     private final int PICK_IMAGE = 100;
+    private final int STORAGE_PERMISSION_CODE = 2;
 
     Exercise newExercise;
     String currentPhotoPath = "";    // name of file saved by camera
@@ -136,11 +141,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickAddPhotoButton(View view){
-        // Save a selected photo to app...
-        Intent gallery =
-                new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery, PICK_IMAGE);
+
+        // Verify that permission to read external storage has been granted
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED){
+
+            // Save a selected photo to app...
+            Intent gallery =
+                    new Intent(Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            startActivityForResult(gallery, PICK_IMAGE);
+        }
+        else {
+            requestStoragePermission();
+        }
+
+
 
     } // end onClickAddPhotoButton
 
@@ -197,8 +213,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
-
     } // end onClickTakePhotoButton
 
     private File createImageFile() throws IOException {
@@ -218,4 +232,31 @@ public class MainActivity extends AppCompatActivity {
 
     } // end createImageFile
 
+    private void requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Permission needed")
+                    .setMessage("This permission is needed to access images saved to this device.")
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(MainActivity.this,
+                                    new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+                        }
+                    })
+                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create().show();
+
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+        }
+    }
 }

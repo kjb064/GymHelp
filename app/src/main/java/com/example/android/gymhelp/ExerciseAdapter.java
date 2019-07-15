@@ -1,7 +1,9 @@
 package com.example.android.gymhelp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ExerciseAdapter extends ArrayAdapter<Exercise> {
@@ -75,7 +78,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImagePath()){
-            // Get the image resource name from the current Exercise object and
+            // (OLD) Get the image resource name from the current Exercise object and
             // set the image to iconView
 
             /*imageID = resources.getIdentifier(currentExercise.getImageResourceName(),
@@ -108,7 +111,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             bmOptions.inPurgeable = true;
 
             Bitmap bitmap = BitmapFactory.decodeFile(currentExercise.getImageResourcePath(), bmOptions);
-            if(bitmap != null){
+            if(bitmap != null) {
                 iconView.setImageBitmap(bitmap);
             }
             else{
@@ -140,5 +143,6 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // so that it can be shown in the ListView
         return listItemView;
     }
+
 
 }
