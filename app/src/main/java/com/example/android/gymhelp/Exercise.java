@@ -7,12 +7,8 @@ public class Exercise {
     private int exerciseID;
     private String exerciseName = "";
     private String setsAndReps = "";
-    //private int NO_IMAGE_PROVIDED = -1;
-    //private int imageResourceID = NO_IMAGE_PROVIDED;
-
-    private String NO_IMAGE_PROVIDED = "NONE";
-    private String imageResourceName = NO_IMAGE_PROVIDED;
-    private String imageResourcePath = NO_IMAGE_PROVIDED;
+    private String imageResourceName = Constants.NO_IMAGE_PROVIDED;
+    private String imageResourcePath = Constants.NO_IMAGE_PROVIDED;
     private int recentWeight = 0;
     private int exerciseTarget;
     private Date date;
@@ -43,7 +39,7 @@ public class Exercise {
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
         this.exerciseTarget = exerciseTarget;
-        this.imageResourceName = NO_IMAGE_PROVIDED;
+        this.imageResourceName = Constants.NO_IMAGE_PROVIDED;
     }
 
 
@@ -103,12 +99,12 @@ public class Exercise {
     //}
 
     public boolean hasImage() {
-        return ! (imageResourceName != null && NO_IMAGE_PROVIDED.equals(imageResourceName));
+        return ! (imageResourceName != null && Constants.NO_IMAGE_PROVIDED.equals(imageResourceName));
     }
 
     public boolean hasImagePath(){
         if(imageResourcePath != null){
-            return (! NO_IMAGE_PROVIDED.equals(imageResourcePath));
+            return (! Constants.NO_IMAGE_PROVIDED.equals(imageResourcePath));
         }
         else{
             return false;
