@@ -36,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 16);     // Most recent version: 16
+        super(context, DATABASE_NAME, null, 17);     // Most recent version: 17
         this.context = context;
     }
 
@@ -493,4 +493,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
     } // end deleteExercise
+
+    /*
+    *   Called after the user requests an edit to an exercise. Updates the exercise's data
+    *   within the table.
+     */
+    public void updateExercise(Exercise exercise){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + ID + " = " + exercise.getExerciseID() + ";", null);
+
+        if(c.moveToFirst()){
+
+            String name = c.getString(1);
+            String setsAndReps = c.getString(3);
+            String imagePath = c.getString(6);
+
+            //if(imagePath == null){
+            //    imagePath = "";
+            //}
+
+            String sql = "UPDATE " + TABLE_NAME + " SET ";
+            boolean updateNeeded = false;
+
+            if(!name.equals(exercise.getExerciseName())){
+                sql += EXERCISE_NAME + " = '" + exercise.getExerciseName() + "'";
+                updateNeeded = true;
+            }
+
+            if(!setsAndReps.equals(exercise.getSetsAndReps())){
+                if(updateNeeded){
+                    sql += ", " + SETS_REPS + " = '" + exercise.getSetsAndReps() + "'";
+                }
+                else{
+                    sql += SETS_REPS + " = '" + exercise.getSetsAndReps() + "'";
+                    updateNeeded = true;
+                }
+            }
+
+            if(imagePath != null && exercise.getImageResourcePath() != null){
+                if(!imagePath.equals(exercise.getImageResourcePath())){
+                    if(updateNeeded){
+                        sql += ", " + IMAGE_PATH + " = '" + exercise.getImageResourcePath() + "'";
+                    }
+                    else{
+                        sql += IMAGE_PATH + " = '" + exercise.getImageResourcePath() + "'";
+                        updateNeeded = true;
+                    }
+                }
+            }
+            else if(imagePath == null && exercise.getImageResourcePath() != null){
+                if(updateNeeded){
+                    sql += ", " + IMAGE_PATH + " = '" + exercise.getImageResourcePath() + "'";
+                }
+                else{
+                    sql += IMAGE_PATH + " = '" + exercise.getImageResourcePath() + "'";
+                    updateNeeded = true;
+                }
+            }
+
+            if(updateNeeded){
+                sql += " WHERE " + ID + " = " + exercise.getExerciseID() + ";";
+                Log.d("SQL", "" + sql);
+                db.execSQL(sql);
+            }
+        }
+
+    } // end updateExercise
 }
