@@ -48,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private final int STORAGE_PERMISSION_CODE = 2;
 
     Exercise newExercise;
-    String currentPhotoPath = "";    // name of file saved by camera
-    private String NO_IMAGE_PROVIDED = "NONE";
+    public static String currentPhotoPath = "";    // name of file saved by camera
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +98,10 @@ public class MainActivity extends AppCompatActivity {
                 EditText nameEditText = (EditText) dialoglayout.findViewById(R.id.name_edit_text);
                 EditText setsRepsEditText = (EditText) dialoglayout.findViewById(R.id.sets_reps_edit_text);
 
-
                 // Check that both fields have been filled in
-
-                if(nameEditText.getText().toString().isEmpty() || setsRepsEditText.getText().toString().isEmpty()){
-                    Toast.makeText(getApplicationContext(), "All text fields are required.", Toast.LENGTH_SHORT).show();
+                if(nameEditText.getText().toString().trim().length() == 0
+                        || setsRepsEditText.getText().toString().trim().length() == 0){
+                    Toast.makeText(getApplicationContext(), "Empty texts fields are not allowed.", Toast.LENGTH_SHORT).show();
                 }
                 else{
                     newExercise = new Exercise(nameEditText.getText().toString(),
@@ -115,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                         currentPhotoPath = "";
                     }
                     else{
-                        newExercise.setImageResourcePath(NO_IMAGE_PROVIDED);
+                        newExercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
                     }
 
                     myDb.addExercise(newExercise);
@@ -156,8 +154,6 @@ public class MainActivity extends AppCompatActivity {
             requestStoragePermission();
         }
 
-
-
     } // end onClickAddPhotoButton
 
     @Override
@@ -169,12 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
-            /*And the result returns the Uri of the selected picture (an Uri can be
-            regarded as the "address" or an identifier of the picture), which is passed
-            to the ImageView to load and display.*/
-            // EXAMPLE:
-            // Uri imageUri = data.getData();
-            // imageView.setImageURI(imageUri);
+            /*The result returns the Uri ("address") of the selected picture. */
             Uri imageUri = data.getData();
             currentPhotoPath = getPath(imageUri);
             Log.d("Path", "" + currentPhotoPath);
