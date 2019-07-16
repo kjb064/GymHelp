@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -122,29 +123,80 @@ public class ChestFragment extends Fragment {
 
         if(item.getGroupId() == CHEST_GROUP_ID){
 
-            DatabaseHelper db = new DatabaseHelper(getActivity());
+            final DatabaseHelper db = new DatabaseHelper(getActivity());
+            AdapterView.AdapterContextMenuInfo info =
+                    (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
             switch (item.getItemId()){
                 case DELETE_ID:
-                    AdapterView.AdapterContextMenuInfo info =
-                            (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
                     int id = ex.get((int) info.id).getExerciseID();
                     db.deleteExercise(id);
 
                     Toast.makeText(getActivity(),
-                            "DELETED " + ex.get((int) info.id).getExerciseID(),
+                            "DELETED " + ex.get((int) info.id).getExerciseName(),
                             Toast.LENGTH_SHORT).show();
                     ex.remove((int) info.id);
 
                     // "Refresh" the Fragment once the exercise has been deleted
-                    Fragment currentFragment = getFragmentManager().findFragmentByTag(getTag());
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                    fragmentTransaction.detach(currentFragment);
-                    fragmentTransaction.attach(currentFragment);
-                    fragmentTransaction.commit();
+                    refreshFragment();
                     return true;
                 case EDIT_ID:
+
+                    final Exercise exercise = ex.get((int) info.id);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Edit " + exercise.getExerciseName());
+
+                    LayoutInflater inflater = getLayoutInflater();
+                    final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+                    builder.setView(dialoglayout);
+
+                    final EditText nameEditText = (EditText) dialoglayout.findViewById(R.id.name_edit_text);
+                    nameEditText.setText(exercise.getExerciseName());
+                    final EditText setsRepsEditText = (EditText) dialoglayout.findViewById(R.id.sets_reps_edit_text);
+                    setsRepsEditText.setText(exercise.getSetsAndReps());
+
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Make sure fields are not blank
+                            if(nameEditText.getText().toString().trim().length() == 0
+                                    || setsRepsEditText.getText().toString().trim().length() == 0){
+                                Toast.makeText(getContext(), "Empty texts fields are not allowed.", Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                Exercise newExercise = new Exercise(nameEditText.getText().toString(),
+                                        setsRepsEditText.getText().toString(),
+                                        exercise.getExerciseTarget());
+                                newExercise.setExerciseID(exercise.getExerciseID());
+
+                                // If a new photo has been selected/taken, update the path too.
+                                if(!MainActivity.currentPhotoPath.isEmpty()){
+                                    newExercise.setImageResourcePath(MainActivity.currentPhotoPath);
+                                    MainActivity.currentPhotoPath = "";
+                                }
+                                else{
+                                    // Otherwise, leave the path the same.
+                                    newExercise.setImageResourcePath(exercise.getImageResourcePath());
+                                }
+
+                                db.updateExercise(newExercise);
+
+                                // "Refresh" the Fragment once the exercise has been updated
+                                refreshFragment();
+                            }
+
+                        }
+                    });
+
+                    builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    builder.show();
                     return true;
                 default:
                     return super.onContextItemSelected(item);
@@ -153,5 +205,13 @@ public class ChestFragment extends Fragment {
         }
         return false;
     } // end onContextItemSelected
+
+    private void refreshFragment(){
+        Fragment currentFragment = getFragmentManager().findFragmentByTag(getTag());
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.detach(currentFragment);
+        fragmentTransaction.attach(currentFragment);
+        fragmentTransaction.commit();
+    } // end refreshFragment
 
 }
