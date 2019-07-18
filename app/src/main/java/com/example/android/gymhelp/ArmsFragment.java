@@ -81,7 +81,11 @@ public class ArmsFragment extends Fragment {
                 final NumberPicker picker = (NumberPicker) dialoglayout.findViewById(R.id.weight_picker);
                 picker.setMaxValue(1000);
                 picker.setMinValue(0);
-                picker.setFormatter(new NumberPicker.Formatter() {
+
+                final NumberPicker decimalPicker = (NumberPicker) dialoglayout.findViewById(R.id.decimal_picker);
+                decimalPicker.setMaxValue(9);
+                decimalPicker.setMinValue(0);
+                decimalPicker.setFormatter(new NumberPicker.Formatter() {
                     @Override
                     public String format(int value) {
                         return value + " lbs.";
@@ -92,7 +96,9 @@ public class ArmsFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         int weight = picker.getValue();
-                        db.updateExerciseWeight(exercise.getExerciseID(), weight);
+                        int decimal = decimalPicker.getValue();
+                        float finalWeight = Float.parseFloat(weight + "." + decimal);
+                        db.updateExerciseWeight(exercise.getExerciseID(), finalWeight);
                         getActivity().finish();
                         startActivity(getActivity().getIntent());
                     }

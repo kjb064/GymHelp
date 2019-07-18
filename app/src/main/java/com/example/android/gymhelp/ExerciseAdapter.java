@@ -72,7 +72,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         setTextView.setText(currentExercise.getSetsAndReps());
 
         TextView weightTextView = (TextView) listItemView.findViewById(R.id.weight_text_view);
-        weightTextView.setText("Weight: " + Integer.toString(currentExercise.getRecentWeight()) + " lbs.");
+        weightTextView.setText("Weight: " + Float.toString(currentExercise.getRecentWeight()) + " lbs.");
 
         // Find the ImageView in the list_item.xml layout with the ID "image"
         ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);

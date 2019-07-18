@@ -36,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 17);     // Most recent version: 17
+        super(context, DATABASE_NAME, null, 18);     // Most recent version: 18
         this.context = context;
     }
 
@@ -45,7 +45,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL( "CREATE TABLE " + TABLE_NAME
                 + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + EXERCISE_NAME + " TEXT, "
-                + WEIGHT + " INTEGER, "
+                + WEIGHT + " FLOAT, "
                 + SETS_REPS + " TEXT, "
                 + DATE + " TEXT, "
                 + IMAGE_NAME + " TEXT, "
@@ -267,28 +267,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    /*
-        (DONE) Will require modification (or new methods) for each fragment under "Cutting"
-     */
-    /*public ArrayList getCuttingTableData(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting ", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                int weight = c.getInt(2);
-                String sets = c.getString(3);
-                // String date;
-                String imageName = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imageName));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-    } */
 
     public ArrayList getChestExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
@@ -299,7 +277,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 int id = c.getInt(0);
                 String name = c.getString(1);
-                int weight = c.getInt(2);
+                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 // String date;
 
@@ -322,7 +300,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 int id = c.getInt(0);
                 String name = c.getString(1);
-                int weight = c.getInt(2);
+                float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 // String date;
 
@@ -346,7 +324,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 int id = c.getInt(0);
                 String name = c.getString(1);
-                int weight = c.getInt(2);
+                float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 // String date;
 
@@ -369,7 +347,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 int id = c.getInt(0);
                 String name = c.getString(1);
-                int weight = c.getInt(2);
+                float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 // String date;
 
@@ -392,7 +370,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 int id = c.getInt(0);
                 String name = c.getString(1);
-                int weight = c.getInt(2);
+                float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 // String date;
 
@@ -418,7 +396,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 int id = c.getInt(0);
                 String name = c.getString(1);
-                int weight = c.getInt(2);
+                float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 // String date;
 
@@ -432,7 +410,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exercises;
     } // end getAbsExercises
 
-    public void updateExerciseWeight(int exerciseID, int weight){
+    public void updateExerciseWeight(int exerciseID, float weight){
         SQLiteDatabase db = this.getWritableDatabase();
         String sql = "UPDATE cutting SET weight = " + weight + " WHERE ID = " + exerciseID + ";";
         db.execSQL(sql);

@@ -9,12 +9,12 @@ public class Exercise {
     private String setsAndReps = "";
     private String imageResourceName = Constants.NO_IMAGE_PROVIDED;
     private String imageResourcePath = Constants.NO_IMAGE_PROVIDED;
-    private int recentWeight = 0;
+    private float recentWeight = 0;
     private int exerciseTarget;
     private Date date;
 
     // MAY HAVE TO CHANGE HOW recentWeight is initialized
-    public Exercise(String exerciseName, String setsAndReps, String imageResourceName, int recentWeight, int exerciseTarget){
+    public Exercise(String exerciseName, String setsAndReps, String imageResourceName, float recentWeight, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.imageResourceName = imageResourceName;
@@ -34,7 +34,7 @@ public class Exercise {
     /*
     *   Used within DatabaseHelper; lacks any image-related parameters
      */
-    public Exercise(String exerciseName, String setsAndReps, int recentWeight, int exerciseTarget){
+    public Exercise(String exerciseName, String setsAndReps, float recentWeight, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
@@ -50,7 +50,7 @@ public class Exercise {
     *
     * *********NOTE: Temporarily removed imageResourceName
     * */
-    public Exercise(int exerciseID, String exerciseName, String setsAndReps, int recentWeight, String imageResourcePath){ //String imageResourceName
+    public Exercise(int exerciseID, String exerciseName, String setsAndReps, float recentWeight, String imageResourcePath){ //String imageResourceName
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
@@ -84,7 +84,7 @@ public class Exercise {
 
     public String getImageResourceName(){ return this.imageResourceName; }
 
-    public int getRecentWeight() {
+    public float getRecentWeight() {
         return recentWeight;
     }
 

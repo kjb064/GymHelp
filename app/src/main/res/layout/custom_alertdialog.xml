@@ -7,6 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:gravity="center">
 
         <NumberPicker
@@ -15,6 +16,21 @@
             android:id="@+id/weight_picker"
             android:theme="@style/AppTheme.Picker">
         </NumberPicker>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="."
+            android:padding="10dp"
+            android:textSize="50dp"/>
+
+        <NumberPicker
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/decimal_picker"
+            android:theme="@style/AppTheme.Picker">
+        </NumberPicker>
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
