@@ -15,4 +15,6 @@
 
     <!-- Background color for the phrases category -->
     <color name="cutting_color">#16AFCA</color>
+
+    <color name="title_color">#FFFF</color>
 </resources>
