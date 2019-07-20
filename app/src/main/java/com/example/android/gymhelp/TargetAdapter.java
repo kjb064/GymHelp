@@ -34,10 +34,9 @@ public class TargetAdapter extends FragmentPagerAdapter {
             return new BackFragment();
         } else if (position == Constants.SHOULDERS) {
             return new ShouldersFragment();
-        } else {    // ADD THIS WHEN ABS READY:  if (position == Constants.ABS)
+        } else if (position == Constants.ARMS){
             return new ArmsFragment();
-        } // else { return new AbsFragment(); }
-
+        } else { return new AbsFragment(); }
 
     }
 
@@ -59,8 +58,8 @@ public class TargetAdapter extends FragmentPagerAdapter {
             return mContext.getString(R.string.target_back);
         } else if (position == Constants.SHOULDERS) {
             return mContext.getString(R.string.target_shoulders);
-        } else {    // ADD THIS WHEN ABS READY:  if (position == Constants.ABS)
+        } else if (position == Constants.ARMS){
             return mContext.getString(R.string.target_arms);
-        } //else { return mContext.getString(R.string.target_abs); }
+        } else { return mContext.getString(R.string.target_abs); }
     }
 }
