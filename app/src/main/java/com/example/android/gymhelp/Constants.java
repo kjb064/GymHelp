@@ -8,6 +8,6 @@ public class Constants {
     public static final int ARMS = 4;
     public static final int ABS = 5;
 
-    public static final int NUM_TARGETS = 5; // CURRENTLY EXCLUDING ABS; WOULD BE 6 WITH ABS
+    public static final int NUM_TARGETS = 6;
     public static final String NO_IMAGE_PROVIDED = "NONE";
 }
