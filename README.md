@@ -1,0 +1,2 @@
+# GymHelp
+An app used for logging the weights used for exercises at the gym. Exercises are presented in list format which are separated into tabs for each category of exercise (i.e. Arms, Shoulders, Legs, etc.). Users can add new exercises by including the exercise's name, sets and reps, and an optional photo either selected from the phone's gallery or taken by its camera. These attributes can be edited once added, or the exercise can be deleted entirely.
