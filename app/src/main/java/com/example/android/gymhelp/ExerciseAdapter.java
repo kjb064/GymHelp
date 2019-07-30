@@ -60,36 +60,26 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // Find the TextView in the list_item.xml layout with the ID version_name
         TextView exerciseTextView = (TextView) listItemView.findViewById(R.id.exercise_text_view);
 
-        // Get the version name from the current object and
+        // Get the name from the current object and
         // set this text on the name TextView
         exerciseTextView.setText(currentExercise.getExerciseName());
 
         // Find the TextView in the list_item.xml layout with the ID version_number
         TextView setTextView = (TextView) listItemView.findViewById(R.id.set_text_view);
 
-        // Get the version number from the current object and
-        // set this text on the number TextView
         setTextView.setText(currentExercise.getSetsAndReps());
 
         TextView weightTextView = (TextView) listItemView.findViewById(R.id.weight_text_view);
         weightTextView.setText("Weight: " + Float.toString(currentExercise.getRecentWeight()) + " lbs.");
 
+        TextView dateTextView = (TextView) listItemView.findViewById(R.id.date_text_view);
+        String date = context.getResources().getString(R.string.weight_updated) + " " + currentExercise.getDate();
+        dateTextView.setText(date);
+
         // Find the ImageView in the list_item.xml layout with the ID "image"
         ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImagePath()){
-            // (OLD) Get the image resource name from the current Exercise object and
-            // set the image to iconView
-
-            /*imageID = resources.getIdentifier(currentExercise.getImageResourceName(),
-                    "drawable", context.getPackageName() );
-            iconView.setImageResource(imageID);
-
-            // explicitly set it to visible
-            iconView.setVisibility(View.VISIBLE);*/
-
-            Log.d("Hello", "Has image path: " + currentExercise.getExerciseName() + ""
-             + currentExercise.getImageResourcePath());
 
             // Get the dimensions of the View
             int targetW = (int) resources.getDimension(R.dimen.list_item_height);
