@@ -16,13 +16,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:screenOrientation="portrait">
+        <activity android:name=".MainActivity" android:screenOrientation="portrait" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.intent.action.SEARCH"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
 
         <provider
@@ -35,36 +38,6 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!--<activity
-            android:name=".CuttingActivity"
-            android:label="Cutting"
-            android:parentActivityName=".MainActivity">
-
-            &lt;!&ndash; Parent activity meta-data to support 4.0 and lower &ndash;&gt;
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".ChestActivity"
-            android:label="@string/title_activity_chest"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".BackActivity"
-            android:label="@string/title_activity_back"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".LegsActvity"
-            android:label="@string/title_activity_legs_actvity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ArmsActivity"
-            android:label="@string/title_activity_arms"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ShouldersActivity"
-            android:label="@string/title_activity_shoulders"
-            android:theme="@style/AppTheme.NoActionBar"></activity>-->
     </application>
 
 </manifest>
