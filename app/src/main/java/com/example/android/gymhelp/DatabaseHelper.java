@@ -267,12 +267,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public ArrayList getAllExercises(){
+        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + ";", null);
+
+        if(c.moveToFirst()){
+            do{
+                int id = c.getInt(0);
+                String name = c.getString(1);
+                float weight = c.getFloat(2);
+                String sets = c.getString(3);
+                // String date;
+
+                //String imageName = c.getString(5);
+                String imagePath = c.getString(6);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath)); // Removed imageName parameter
+            }while(c.moveToNext());
+        }
+
+        c.close();
+        return exercises;
+    } // end getAllExercises
 
     public ArrayList getChestExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting " +
-                                   "WHERE " + EXERCISE_TARGET + " = " + Constants.CHEST + ";", null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.CHEST + ";", null);
         if(c.moveToFirst()){
             do{
                 int id = c.getInt(0);
@@ -294,8 +316,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList getLegExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting " +
-                                   "WHERE " + EXERCISE_TARGET + " = " + Constants.LEGS + ";", null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.LEGS + ";", null);
         if(c.moveToFirst()){
             do{
                 int id = c.getInt(0);
@@ -318,8 +340,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList getBackExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting " +
-                                   "WHERE " + EXERCISE_TARGET + " = " + Constants.BACK + ";", null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.BACK + ";", null);
         if(c.moveToFirst()){
             do{
                 int id = c.getInt(0);
@@ -341,8 +363,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList getShoulderExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting " +
-                                   "WHERE " + EXERCISE_TARGET + " = " + Constants.SHOULDERS + ";", null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.SHOULDERS + ";", null);
         if(c.moveToFirst()){
             do{
                 int id = c.getInt(0);
@@ -364,8 +386,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList getArmExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting " +
-                                   "WHERE " + EXERCISE_TARGET + " = " + Constants.ARMS + ";", null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.ARMS + ";", null);
         if(c.moveToFirst()){
             do{
                 int id = c.getInt(0);
@@ -390,8 +412,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList getAbsExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM cutting " +
-                                   "WHERE " + EXERCISE_TARGET + " = " + Constants.ABS + ";", null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.ABS + ";", null);
         if(c.moveToFirst()){
             do{
                 int id = c.getInt(0);
@@ -412,7 +434,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void updateExerciseWeight(int exerciseID, float weight){
         SQLiteDatabase db = this.getWritableDatabase();
-        String sql = "UPDATE cutting SET weight = " + weight + " WHERE ID = " + exerciseID + ";";
+        String sql = "UPDATE " + TABLE_NAME + " SET weight = " + weight + " WHERE ID = " + exerciseID + ";";
         db.execSQL(sql);
     } // end updateExerciseWeight
 
