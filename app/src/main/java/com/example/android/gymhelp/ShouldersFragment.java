@@ -26,8 +26,9 @@ import java.util.ArrayList;
  */
 public class ShouldersFragment extends Fragment {
 
-    private static final int DELETE_ID = Menu.FIRST;
-    private static final int EDIT_ID = Menu.FIRST + 1;
+    private static final int READ_FULL_ID = Menu.FIRST;
+    private static final int DELETE_ID = Menu.FIRST + 1;
+    private static final int EDIT_ID = Menu.FIRST + 2;
     ArrayList<Exercise> ex;
     private static final int SHOULDERS_GROUP_ID = Constants.SHOULDERS;
 
@@ -121,6 +122,7 @@ public class ShouldersFragment extends Fragment {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(SHOULDERS_GROUP_ID, READ_FULL_ID, 0, R.string.menu_read_full);
         menu.add(SHOULDERS_GROUP_ID, DELETE_ID, 0, R.string.menu_delete);
         menu.add(SHOULDERS_GROUP_ID, EDIT_ID, 0, R.string.menu_edit);
     }
@@ -134,23 +136,58 @@ public class ShouldersFragment extends Fragment {
             AdapterView.AdapterContextMenuInfo info =
                     (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
-            switch (item.getItemId()){
-                case DELETE_ID:
+            final Exercise exercise = ex.get((int) info.id);
 
-                    int id = ex.get((int) info.id).getExerciseID();
+            switch (item.getItemId()){
+                case READ_FULL_ID: {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(exercise.getExerciseName());
+
+                    LayoutInflater inflater = getLayoutInflater();
+                    final View readFullLayout = inflater.inflate(R.layout.read_full, null);
+                    builder.setView(readFullLayout);
+
+                    final TextView fullSetsReps = (TextView) readFullLayout.findViewById(R.id.full_sets_reps);
+                    String text = fullSetsReps.getText() + exercise.getSetsAndReps();
+                    fullSetsReps.setText(text);
+
+                    final TextView fullWeight = (TextView) readFullLayout.findViewById(R.id.full_weight);
+                    text = fullWeight.getText() + "" + exercise.getRecentWeight();
+                    fullWeight.setText(text);
+
+                    final TextView fullDate = (TextView) readFullLayout.findViewById(R.id.full_date);
+                    text = fullDate.getText() + exercise.getDate();
+                    fullDate.setText(text);
+
+                    builder.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    builder.show();
+                    return true;
+                }
+
+                case DELETE_ID: {
+
+                    int id = exercise.getExerciseID();
                     db.deleteExercise(id);
 
                     Toast.makeText(getActivity(),
-                            "DELETED " + ex.get((int) info.id).getExerciseName(),
+                            "DELETED " + exercise.getExerciseName(),
                             Toast.LENGTH_SHORT).show();
                     ex.remove((int) info.id);
 
                     // "Refresh" the Fragment once the exercise has been deleted
                     refreshFragment();
                     return true;
-                case EDIT_ID:
+                }
 
-                    final Exercise exercise = ex.get((int) info.id);
+                case EDIT_ID: {
+
+                    //final Exercise exercise = ex.get((int) info.id);
                     final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle("Edit " + exercise.getExerciseName());
 
@@ -167,22 +204,20 @@ public class ShouldersFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             // Make sure fields are not blank
-                            if(nameEditText.getText().toString().trim().length() == 0
-                                    || setsRepsEditText.getText().toString().trim().length() == 0){
+                            if (nameEditText.getText().toString().trim().length() == 0
+                                    || setsRepsEditText.getText().toString().trim().length() == 0) {
                                 Toast.makeText(getContext(), "Empty texts fields are not allowed.", Toast.LENGTH_SHORT).show();
-                            }
-                            else {
+                            } else {
                                 Exercise newExercise = new Exercise(nameEditText.getText().toString(),
                                         setsRepsEditText.getText().toString(),
                                         exercise.getExerciseTarget());
                                 newExercise.setExerciseID(exercise.getExerciseID());
 
                                 // If a new photo has been selected/taken, update the path too.
-                                if(!MainActivity.currentPhotoPath.isEmpty()){
+                                if (!MainActivity.currentPhotoPath.isEmpty()) {
                                     newExercise.setImageResourcePath(MainActivity.currentPhotoPath);
                                     MainActivity.currentPhotoPath = "";
-                                }
-                                else{
+                                } else {
                                     // Otherwise, leave the path the same.
                                     newExercise.setImageResourcePath(exercise.getImageResourcePath());
                                 }
@@ -205,6 +240,7 @@ public class ShouldersFragment extends Fragment {
 
                     builder.show();
                     return true;
+                }
                 default:
                     return super.onContextItemSelected(item);
             }
