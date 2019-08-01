@@ -5,40 +5,31 @@ public class Exercise {
     private int exerciseID;
     private String exerciseName = "";
     private String setsAndReps = "";
-    private String imageResourceName = Constants.NO_IMAGE_PROVIDED;
     private String imageResourcePath = Constants.NO_IMAGE_PROVIDED;
     private float recentWeight = 0;
     private int exerciseTarget;
-    //private Date date;
     private String date = Constants.DEFAULT_DATE;
 
-    // MAY HAVE TO CHANGE HOW recentWeight is initialized
-    public Exercise(String exerciseName, String setsAndReps, String imageResourceName, float recentWeight, int exerciseTarget){
-        this.exerciseName = exerciseName;
-        this.setsAndReps = setsAndReps;
-        this.imageResourceName = imageResourceName;
-        this.recentWeight = recentWeight;
-        this.exerciseTarget = exerciseTarget;
-        //date = new Date();
-    }
-
+    /*
+    *   Used within the MainActivity's "onClickAddButton" method (after which the exercise
+    *   is passed to the DatabaseHelper's "addExercise" method) and TargetFragment's
+    *   "onContextItemSelected" method for the "Edit" menu option (after which the exercise
+    *   is passed to the DatabaseHelper's "updateExercise" method).
+     */
     public Exercise(String exerciseName, String setsAndReps, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
-        //this.recentWeight = recentWeight;
         this.exerciseTarget = exerciseTarget;
-        //date = new Date();
     }
 
     /*
-    *   Used within DatabaseHelper to add the default exercises; lacks any image-related parameters
+     *   Used within DatabaseHelper to add the default exercises; lacks any image-related parameters
      */
     public Exercise(String exerciseName, String setsAndReps, float recentWeight, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
         this.exerciseTarget = exerciseTarget;
-        this.imageResourceName = Constants.NO_IMAGE_PROVIDED;
     }
 
 
@@ -52,13 +43,9 @@ public class Exercise {
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
-        //this.imageResourceName = imageResourceName;
         this.imageResourcePath = imageResourcePath;
-        //date = new Date();
         this.date = date;
     }
-
-
 
     public int getExerciseID(){
         return this.exerciseID;
@@ -76,20 +63,8 @@ public class Exercise {
         return setsAndReps;
     }
 
-    //public int getImageResourceID() {
-    //    return imageResourceID;
-    //}
-
-    public String getImageResourceName(){ return this.imageResourceName; }
-
     public float getRecentWeight() {
         return recentWeight;
-    }
-
-    public void setImageResourceName(String name){ this.imageResourceName = name; }
-
-    public boolean hasImage() {
-        return ! (imageResourceName != null && Constants.NO_IMAGE_PROVIDED.equals(imageResourceName));
     }
 
     public boolean hasImagePath(){
