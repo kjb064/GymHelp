@@ -1,15 +1,10 @@
 package com.example.android.gymhelp;
 
 import android.Manifest;
-import android.app.FragmentTransaction;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -25,15 +20,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private TargetAdapter adapter;
     private ViewPager viewPager;
+    private CheckBox checkBox;
     private final int REQUEST_IMAGE_CAPTURE = 1;
     private final int PICK_IMAGE = 100;
     private final int STORAGE_PERMISSION_CODE = 2;
@@ -92,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
 
         builder.setView(dialoglayout);
+        checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -120,24 +113,17 @@ public class MainActivity extends AppCompatActivity {
 
                     myDb.addExercise(newExercise);
 
-                    // Reset activity so new exercise will appear
-                    //finish();
-                    //startActivity(getIntent());
+                    // Reset the current Fragment's data
                     if(viewPager.getCurrentItem() != tabPosition) Log.d("hello", "not tab pos");
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag(Integer.toString(tabPosition));
 
                     if(fragment != null){
-                        Log.d("hello", "not null");
                         ((TargetFragment) fragment).resetFragmentData();
                     }
                     else{
                         Log.d("hello", "fragment is null");
-
                     }
-
-
                 }
-
             }
         });
 
@@ -173,15 +159,52 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
-            // (OLD get the bitmap from the file name
-            //Bitmap takenImage = BitmapFactory.decodeFile(currentPhotoPath);
 
+            checkBox.setClickable(true);
+            checkBox.setText(R.string.photo_selected);
+            checkBox.setChecked(true);
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(!isChecked){
+                        if(!currentPhotoPath.isEmpty()){
+                            File deleteFile = new File(currentPhotoPath);
+                            if(deleteFile.delete()){
+                                Log.d("Delete", "Successfully deleted file at " + currentPhotoPath);
+                            }
+                            else {
+                                Log.d("Delete", "Could not delete file at " + currentPhotoPath);
+                            }
+
+                            currentPhotoPath = "";
+                        }
+                        checkBox.setClickable(false);
+                        checkBox.setText(R.string.no_photo_selected);
+                    }
+                }
+            });
         }
         else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
             /*The result returns the Uri ("address") of the selected picture. */
             Uri imageUri = data.getData();
             currentPhotoPath = getPath(imageUri);
             Log.d("Path", "" + currentPhotoPath);
+
+            checkBox.setClickable(true);
+            checkBox.setText(R.string.photo_selected);
+            checkBox.setChecked(true);
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(!isChecked){
+                        if(!currentPhotoPath.isEmpty()){
+                            currentPhotoPath = "";
+                        }
+                        checkBox.setClickable(false);
+                        checkBox.setText(R.string.no_photo_selected);
+                    }
+                }
+            });
         }
     } // end onActivityResult
 
