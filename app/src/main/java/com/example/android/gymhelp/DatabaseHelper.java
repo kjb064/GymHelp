@@ -2,19 +2,14 @@ package com.example.android.gymhelp;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -26,15 +21,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String SETS_REPS = "sets";
     private static final String DATE = "date";
     private static final String IMAGE_PATH = "imagePath";
-    private static final String IMAGE_NAME = "image";
     private static final String EXERCISE_TARGET = "target";
 
-    private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private static SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
     private Context context;
 
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 18);     // Most recent version: 18
+        super(context, DATABASE_NAME, null, 19);     // Most recent version: 19
         this.context = context;
     }
 
@@ -46,11 +40,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + WEIGHT + " FLOAT, "
                 + SETS_REPS + " TEXT, "
                 + DATE + " TEXT, "
-                + IMAGE_NAME + " TEXT, "
                 + IMAGE_PATH + " TEXT, "
                 + EXERCISE_TARGET + " INTEGER" + ")" );
-        //db.execSQL("UPDATE " + TABLE_NAME + " SET date = " + DEFAULT_DATE);
-
 
         ContentValues values = new ContentValues();
         final ArrayList<Exercise> exercises = new ArrayList<Exercise>();
@@ -208,12 +199,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Constants.ARMS) );
 
         for(int i = 0; i < exercises.size(); i++){
-            values.put("name", exercises.get(i).getExerciseName());
-            values.put("weight", exercises.get(i).getRecentWeight());
-            values.put("sets", exercises.get(i).getSetsAndReps());
-            values.put("date", Constants.DEFAULT_DATE);
-            //values.put("image", exercises.get(i).getImageResourceName());
-            values.put("target", exercises.get(i).getExerciseTarget());
+            values.put(EXERCISE_NAME, exercises.get(i).getExerciseName());
+            values.put(WEIGHT, exercises.get(i).getRecentWeight());
+            values.put(SETS_REPS, exercises.get(i).getSetsAndReps());
+            values.put(DATE, Constants.DEFAULT_DATE);
+            values.put(EXERCISE_TARGET, exercises.get(i).getExerciseTarget());
             db.insert(TABLE_NAME, null, values);
         }
 
@@ -237,10 +227,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -260,10 +248,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -283,10 +269,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -307,10 +291,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -330,10 +312,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -353,10 +333,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -364,9 +342,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exercises;
     } // end getArmExercises
 
-    /*
-        !!! Will need testing once abs exercises have been added !!!
-     */
     public ArrayList getAbsExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -379,10 +354,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 float weight = c.getFloat(2);
                 String sets = c.getString(3);
                 String date = c.getString(4);
-
-                //String imageName = c.getString(5);
-                String imagePath = c.getString(6);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date)); // Removed imageName parameter
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
             }while(c.moveToNext());
         }
 
@@ -407,16 +380,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addExercise(Exercise newExercise){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("name", newExercise.getExerciseName());
-        values.put("weight", 0);
-        values.put("sets", newExercise.getSetsAndReps());
-
-        values.put("date", Constants.DEFAULT_DATE);
-
-        values.put("image", newExercise.getImageResourceName());
-        values.put("imagePath", newExercise.getImageResourcePath());
-
-        values.put("target", newExercise.getExerciseTarget());
+        values.put(EXERCISE_NAME, newExercise.getExerciseName());
+        values.put(WEIGHT, 0);
+        values.put(SETS_REPS, newExercise.getSetsAndReps());
+        values.put(DATE, Constants.DEFAULT_DATE);
+        values.put(IMAGE_PATH, newExercise.getImageResourcePath());
+        values.put(EXERCISE_TARGET, newExercise.getExerciseTarget());
         db.insert(TABLE_NAME, null, values);
 
     } // end addExercise
@@ -473,7 +442,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             String name = c.getString(1);
             String setsAndReps = c.getString(3);
-            String imagePath = c.getString(6);
+            String imagePath = c.getString(5);
 
             String sql = "UPDATE " + TABLE_NAME + " SET ";
             boolean updateNeeded = false;
