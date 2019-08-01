@@ -1,7 +1,6 @@
 package com.example.android.gymhelp;
 
 import android.Manifest;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -16,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper myDb;
     private TabLayout tabLayout;
     private TargetAdapter adapter;
+    private ViewPager viewPager;
     private final int REQUEST_IMAGE_CAPTURE = 1;
     private final int PICK_IMAGE = 100;
     private final int STORAGE_PERMISSION_CODE = 2;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Find the view pager that will allow the user to swipe between fragments
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
 
         // Create an adapter that knows which fragment should be shown on each page
         adapter = new TargetAdapter(this, getSupportFragmentManager());
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     } // end onCreate
 
     public void onClickAddButton(View view){
+
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final int tabPosition = tabLayout.getSelectedTabPosition();
         String tabName = (String) adapter.getPageTitle(tabPosition);
@@ -119,11 +121,22 @@ public class MainActivity extends AppCompatActivity {
                     myDb.addExercise(newExercise);
 
                     // Reset activity so new exercise will appear
-                    finish();
-                    startActivity(getIntent());
+                    //finish();
+                    //startActivity(getIntent());
+                    if(viewPager.getCurrentItem() != tabPosition) Log.d("hello", "not tab pos");
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Integer.toString(tabPosition));
+
+                    if(fragment != null){
+                        Log.d("hello", "not null");
+                        ((TargetFragment) fragment).resetFragmentData();
+                    }
+                    else{
+                        Log.d("hello", "fragment is null");
+
+                    }
+
 
                 }
-
 
             }
         });
