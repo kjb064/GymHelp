@@ -407,7 +407,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             path = c.getString(0);
         }
 
-        if(path != null){
+        if(path != null && !path.equals(Constants.NO_IMAGE_PROVIDED)){
             File deleteFile = new File(path);
             if(deleteFile.delete()){
                 Log.d("Delete", "Successfully deleted file at " + path);
