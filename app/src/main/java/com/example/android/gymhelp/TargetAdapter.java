@@ -4,8 +4,9 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
-public class TargetAdapter extends FragmentPagerAdapter {
+public class TargetAdapter extends FragmentStatePagerAdapter {
     /** Context of the app */
     private Context mContext;
 
@@ -26,17 +27,38 @@ public class TargetAdapter extends FragmentPagerAdapter {
      */
     @Override
     public Fragment getItem(int position) {
+        MainActivity activity = (MainActivity) mContext;
+
         if (position == Constants.CHEST) {
-            return new ChestFragment();
+            //return new ChestFragment();
+            TargetFragment fragment = TargetFragment.createInstance(Constants.CHEST);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.CHEST));
+            return fragment;
         } else if (position == Constants.LEGS) {
-            return new LegsFragment();
+            //return new LegsFragment();
+            TargetFragment fragment = TargetFragment.createInstance(Constants.LEGS);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.LEGS));
+            return fragment;
         } else if (position == Constants.BACK) {
-            return new BackFragment();
+            //return new BackFragment();
+            TargetFragment fragment = TargetFragment.createInstance(Constants.BACK);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.BACK));
+            return fragment;
         } else if (position == Constants.SHOULDERS) {
-            return new ShouldersFragment();
+            //return new ShouldersFragment();
+            TargetFragment fragment = TargetFragment.createInstance(Constants.SHOULDERS);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.SHOULDERS));
+            return fragment;
         } else if (position == Constants.ARMS){
-            return new ArmsFragment();
-        } else { return new AbsFragment(); }
+            //return new ArmsFragment();
+            TargetFragment fragment = TargetFragment.createInstance(Constants.ARMS);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.ARMS));
+            return fragment;
+        } else { //return new AbsFragment();
+            TargetFragment fragment = TargetFragment.createInstance(Constants.ABS);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.ABS));
+            return fragment;
+        }
 
     }
 
