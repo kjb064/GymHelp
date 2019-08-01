@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">GymHelp</string>
-    <string name="cutting_btn">Cutting</string>
-    <string name="bulking_btn">Bulking</string>
+    <!--<string name="cutting_btn">Cutting</string>
+    <string name="bulking_btn">Bulking</string>-->
 
     <string name="weight_updated">Weight Updated: </string>
+
+    <string name="no_photo_selected">No photo selected</string>
+    <string name="photo_selected">Uncheck to remove photo</string>
 
     <string name="target_chest">Chest</string>
     <string name="target_back">Back</string>
@@ -11,11 +14,11 @@
     <string name="target_shoulders">Shoulders</string>
     <string name="target_legs">Legs</string>
     <string name="target_abs">Abs</string>
-    <string name="title_activity_chest">ChestActivity</string>
+    <!--<string name="title_activity_chest">ChestActivity</string>
     <string name="title_activity_back">BackActivity</string>
     <string name="title_activity_legs_actvity">LegsActvity</string>
     <string name="title_activity_arms">ArmsActivity</string>
-    <string name="title_activity_shoulders">ShouldersActivity</string>
+    <string name="title_activity_shoulders">ShouldersActivity</string>-->
 
     <string name="menu_read_full">Read Full</string>
     <string name="menu_delete">Delete</string>
