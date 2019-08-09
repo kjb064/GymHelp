@@ -1,6 +1,5 @@
 package com.example.android.gymhelp;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
