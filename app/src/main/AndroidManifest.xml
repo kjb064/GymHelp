@@ -19,9 +19,24 @@
         <activity android:name=".MainActivity" android:screenOrientation="portrait" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.SEARCH"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data android:name="android.app.default_searchable"
+                android:value="com.example.android.gymhelp.SearchResultsActivity"/>
+
+        </activity>
+        <activity android:name=".SearchResultsActivity">
+            <!--android:parentActivityName=".MainActivity">-->
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
+            <!--<meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>-->
 
             <meta-data
                 android:name="android.app.searchable"
