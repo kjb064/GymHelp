@@ -215,6 +215,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    /*
+    *  Used by the SearchResultsActivity to load the appropriate exercises based on the given
+    *  query.
+     */
+    public ArrayList getQueryResults(String query){
+        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                                    " WHERE " + EXERCISE_NAME + " LIKE '%" + query + "%';", null);
+        if(c.moveToFirst()){
+            do{
+                int id = c.getInt(0);
+                String name = c.getString(1);
+                float weight = c.getFloat(2);
+                String sets = c.getString(3);
+                String date = c.getString(4);
+                String imagePath = c.getString(5);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
+            }while(c.moveToNext());
+        }
+
+        c.close();
+        return exercises;
+    }
+
     public ArrayList getAllExercises(){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
