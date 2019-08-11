@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private TargetAdapter adapter;
     private ViewPager viewPager;
     private CheckBox checkBox;
+    private View dialoglayout;
     private final int REQUEST_IMAGE_CAPTURE = 1;
     private final int PICK_IMAGE = 100;
     private final int STORAGE_PERMISSION_CODE = 2;
@@ -101,10 +102,10 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("Add new " + tabName + " exercise");
 
         LayoutInflater inflater = getLayoutInflater();
-        final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+        dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+        checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
 
         builder.setView(dialoglayout);
-        checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -134,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
                     myDb.addExercise(newExercise);
 
                     // Reset the current Fragment's data
-                    if(viewPager.getCurrentItem() != tabPosition) Log.d("hello", "not tab pos");
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag(Integer.toString(tabPosition));
 
                     if(fragment != null){
@@ -178,8 +178,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+        int tabPosition = tabLayout.getSelectedTabPosition();
 
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+            checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
             checkBox.setClickable(true);
             checkBox.setText(R.string.photo_selected);
             checkBox.setChecked(true);
@@ -203,6 +205,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+            TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
+                    .findFragmentByTag(Integer.toString(tabPosition));
+
+            if(targetFragment != null && targetFragment.isVisible()){
+                if(targetFragment.checkBox != null){
+                    targetFragment.checkBox.setChecked(true);
+                }
+            }
         }
         else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
             /*The result returns the Uri ("address") of the selected picture. */
@@ -225,6 +236,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+            TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
+                    .findFragmentByTag(Integer.toString(tabPosition));
+
+            if(targetFragment != null && targetFragment.isVisible()){
+                if(targetFragment.checkBox != null){
+                    targetFragment.checkBox.setChecked(true);
+                }
+            }
         }
     } // end onActivityResult
 
