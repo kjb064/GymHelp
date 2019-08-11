@@ -453,6 +453,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     } // end deleteExercise
 
+    public void deleteExerciseImage(Exercise exercise){
+        // Delete the image if possible
+        String path = exercise.getImageResourcePath();
+        if(path != null && !path.equals(Constants.NO_IMAGE_PROVIDED)) {
+            File deleteFile = new File(path);
+            if (deleteFile.delete()) {
+                Log.d("Delete",
+                        "Successfully deleted file at " + exercise.getImageResourcePath());
+            } else {
+                Log.d("Delete",
+                        "Could not delete file at " + exercise.getImageResourcePath());
+            }
+        }
+
+        // Delete the path from the table
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues args = new ContentValues();
+        args.putNull(IMAGE_PATH);
+        db.update(TABLE_NAME, args, ID + " = " + exercise.getExerciseID(), null);
+    }
+
     /*
     *   Called after the user requests an edit to an exercise. Updates the exercise's data
     *   within the table.
