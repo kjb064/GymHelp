@@ -15,12 +15,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 
 public class TargetFragment extends Fragment {
@@ -31,6 +32,7 @@ public class TargetFragment extends Fragment {
     private ExerciseAdapter adapter;
     private DatabaseHelper db;
     private ListView listView;
+    public CheckBox checkBox;
     private static String key = "groupID";
 
     public static TargetFragment createInstance(int TARGET_GROUP_ID){
@@ -239,6 +241,31 @@ public class TargetFragment extends Fragment {
                         final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
                         builder.setView(dialoglayout);
 
+                        checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
+                        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                if(!isChecked){
+                                    Log.d("HI!", "here");
+                                    db.deleteExerciseImage(exercise);
+                                    exercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
+                                    MainActivity.currentPhotoPath = "";
+                                    checkBox.setClickable(false);
+                                    checkBox.setText(R.string.no_photo_selected);
+                                }
+                                else {
+                                    checkBox.setClickable(true);
+                                    checkBox.setText(R.string.photo_selected);
+                                }
+
+                            }
+                        });
+
+                        if(exercise.hasImagePath()){
+
+                            checkBox.setChecked(true);
+                        }
+
                         final EditText nameEditText = (EditText) dialoglayout.findViewById(R.id.name_edit_text);
                         nameEditText.setText(exercise.getExerciseName());
                         final EditText setsRepsEditText = (EditText) dialoglayout.findViewById(R.id.sets_reps_edit_text);
@@ -260,10 +287,12 @@ public class TargetFragment extends Fragment {
 
                                     // If a new photo has been selected/taken, update the path too.
                                     if (!MainActivity.currentPhotoPath.isEmpty()) {
+                                        Log.d("NICE", "1");
                                         newExercise.setImageResourcePath(MainActivity.currentPhotoPath);
                                         MainActivity.currentPhotoPath = "";
                                     } else {
                                         // Otherwise, leave the path the same.
+                                        Log.d("NICE", "2");
                                         newExercise.setImageResourcePath(exercise.getImageResourcePath());
                                     }
 
