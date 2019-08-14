@@ -10,5 +10,6 @@ public class Constants {
 
     public static final int NUM_TARGETS = 6;
     public static final String NO_IMAGE_PROVIDED = "NONE";
+    public static final String NO_FRAGMENT_ID = "NO_ID";
     public static final String DEFAULT_DATE = "--";
 }
