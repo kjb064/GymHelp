@@ -99,55 +99,7 @@ public class TargetFragment extends Fragment {
         // Do this by calling the setAdapter method on the {@link ListView} object and pass in
         // 1 argument, which is the {@link ArrayAdapter} with the variable name itemsAdapter.
         listView.setAdapter(adapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-
-                final Exercise exercise = (Exercise) listView.getAdapter().getItem(position);
-
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(exercise.getExerciseName());
-
-                LayoutInflater inflater = getLayoutInflater();
-                final View dialoglayout = inflater.inflate(R.layout.custom_alertdialog, null);
-
-                builder.setView(dialoglayout);
-                final NumberPicker picker = (NumberPicker) dialoglayout.findViewById(R.id.weight_picker);
-                picker.setMaxValue(1000);
-                picker.setMinValue(0);
-
-                final NumberPicker decimalPicker = (NumberPicker) dialoglayout.findViewById(R.id.decimal_picker);
-                decimalPicker.setMaxValue(9);
-                decimalPicker.setMinValue(0);
-                decimalPicker.setFormatter(new NumberPicker.Formatter() {
-                    @Override
-                    public String format(int value) {
-                        return value + " lbs.";
-                    }
-                });
-
-                builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        int weight = picker.getValue();
-                        int decimal = decimalPicker.getValue();
-                        float finalWeight = Float.parseFloat(weight + "." + decimal);
-                        db.updateExerciseWeight(exercise.getExerciseID(), finalWeight);
-                        refreshFragment();
-                    }
-                });
-                builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-
-                builder.show();
-            }
-        });
-
+        listView.setOnItemClickListener(new ExerciseClickListener(listView, getContext(), Integer.toString(getArguments().getInt(key))));
         return rootView;
     } // end onCreateView
 
@@ -329,7 +281,7 @@ public class TargetFragment extends Fragment {
     *   after an exercise has been changed using the "Edit" menu option and when the weight
     *   has been updated.
      */
-    private void refreshFragment(){
+    public void refreshFragment(){
         Fragment currentFragment = getFragmentManager().findFragmentByTag(getTag());
         if(currentFragment != null) {
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
@@ -350,7 +302,6 @@ public class TargetFragment extends Fragment {
      */
     public void resetFragmentData(){
         if(getUserVisibleHint()) {
-            Log.d("hello", "Visible w/ " + getArguments().getInt(key));
             fetchData();
             adapter.clear();
             adapter.addAll(ex);
