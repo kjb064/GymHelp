@@ -24,10 +24,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 
+import static com.example.android.gymhelp.Constants.DELETE_ID;
+import static com.example.android.gymhelp.Constants.EDIT_ID;
+import static com.example.android.gymhelp.Constants.READ_FULL_ID;
+
 public class TargetFragment extends Fragment {
-    private static final int READ_FULL_ID = Menu.FIRST;
-    private static final int DELETE_ID = Menu.FIRST + 1;
-    private static final int EDIT_ID = Menu.FIRST + 2;
+
     private ArrayList<Exercise> ex;
     private ExerciseAdapter adapter;
     private DatabaseHelper db;
@@ -68,6 +70,9 @@ public class TargetFragment extends Fragment {
                 break;
             case Constants.ABS:
                 ex = db.getAbsExercises();
+                break;
+            case Constants.COMPOUND:
+                ex = db.getCompoundExercises();
                 break;
         }
     }
@@ -116,7 +121,6 @@ public class TargetFragment extends Fragment {
         if(getUserVisibleHint()) {
             if (item.getGroupId() == getArguments().getInt(key)) {
 
-                final DatabaseHelper db = new DatabaseHelper(getActivity());
                 final AdapterView.AdapterContextMenuInfo info =
                         (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
@@ -144,6 +148,87 @@ public class TargetFragment extends Fragment {
                         fullDate.setText(text);
 
                         builder.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        builder.show();
+                        return true;
+                    }
+
+                    case EDIT_ID: {
+
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle("Edit " + exercise.getExerciseName());
+
+                        LayoutInflater inflater = getLayoutInflater();
+                        final View dialogLayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+                        builder.setView(dialogLayout);
+
+                        checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+                        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                if(!isChecked){
+                                    db.deleteExerciseImage(exercise);
+                                    exercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
+                                    MainActivity.currentPhotoPath = "";
+                                    checkBox.setClickable(false);
+                                    checkBox.setText(R.string.no_photo_selected);
+                                }
+                                else {
+                                    checkBox.setClickable(true);
+                                    checkBox.setText(R.string.photo_selected);
+                                }
+
+                            }
+                        });
+
+                        if(exercise.hasImagePath()){
+
+                            checkBox.setChecked(true);
+                        }
+
+                        final EditText nameEditText = (EditText) dialogLayout.findViewById(R.id.name_edit_text);
+                        nameEditText.setText(exercise.getExerciseName());
+                        final EditText setsRepsEditText = (EditText) dialogLayout.findViewById(R.id.sets_reps_edit_text);
+                        setsRepsEditText.setText(exercise.getSetsAndReps());
+
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Make sure fields are not blank
+                                if (nameEditText.getText().toString().trim().length() == 0
+                                        || setsRepsEditText.getText().toString().trim().length() == 0) {
+                                    Toast.makeText(getContext(), "Empty texts fields are not allowed.",
+                                            Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Exercise newExercise = new Exercise(nameEditText.getText().toString(),
+                                            setsRepsEditText.getText().toString(),
+                                            exercise.getExerciseTarget());
+                                    newExercise.setExerciseID(exercise.getExerciseID());
+
+                                    // If a new photo has been selected/taken, update the path too.
+                                    if (!MainActivity.currentPhotoPath.isEmpty()) {
+                                        newExercise.setImageResourcePath(MainActivity.currentPhotoPath);
+                                        MainActivity.currentPhotoPath = "";
+                                    } else {
+                                        // Otherwise, leave the path the same.
+                                        newExercise.setImageResourcePath(exercise.getImageResourcePath());
+                                    }
+
+                                    db.updateExercise(newExercise);
+
+                                    // "Refresh" the Fragment once the exercise has been updated
+                                    refreshFragment();
+                                }
+
+                            }
+                        });
+
+                        builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
@@ -184,89 +269,6 @@ public class TargetFragment extends Fragment {
                         return true;
                     }
 
-                    case EDIT_ID: {
-
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        builder.setTitle("Edit " + exercise.getExerciseName());
-
-                        LayoutInflater inflater = getLayoutInflater();
-                        final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
-                        builder.setView(dialoglayout);
-
-                        checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
-                        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                            @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                if(!isChecked){
-                                    Log.d("HI!", "here");
-                                    db.deleteExerciseImage(exercise);
-                                    exercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
-                                    MainActivity.currentPhotoPath = "";
-                                    checkBox.setClickable(false);
-                                    checkBox.setText(R.string.no_photo_selected);
-                                }
-                                else {
-                                    checkBox.setClickable(true);
-                                    checkBox.setText(R.string.photo_selected);
-                                }
-
-                            }
-                        });
-
-                        if(exercise.hasImagePath()){
-
-                            checkBox.setChecked(true);
-                        }
-
-                        final EditText nameEditText = (EditText) dialoglayout.findViewById(R.id.name_edit_text);
-                        nameEditText.setText(exercise.getExerciseName());
-                        final EditText setsRepsEditText = (EditText) dialoglayout.findViewById(R.id.sets_reps_edit_text);
-                        setsRepsEditText.setText(exercise.getSetsAndReps());
-
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Make sure fields are not blank
-                                if (nameEditText.getText().toString().trim().length() == 0
-                                        || setsRepsEditText.getText().toString().trim().length() == 0) {
-                                    Toast.makeText(getContext(), "Empty texts fields are not allowed.",
-                                            Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Exercise newExercise = new Exercise(nameEditText.getText().toString(),
-                                            setsRepsEditText.getText().toString(),
-                                            exercise.getExerciseTarget());
-                                    newExercise.setExerciseID(exercise.getExerciseID());
-
-                                    // If a new photo has been selected/taken, update the path too.
-                                    if (!MainActivity.currentPhotoPath.isEmpty()) {
-                                        Log.d("NICE", "1");
-                                        newExercise.setImageResourcePath(MainActivity.currentPhotoPath);
-                                        MainActivity.currentPhotoPath = "";
-                                    } else {
-                                        // Otherwise, leave the path the same.
-                                        Log.d("NICE", "2");
-                                        newExercise.setImageResourcePath(exercise.getImageResourcePath());
-                                    }
-
-                                    db.updateExercise(newExercise);
-
-                                    // "Refresh" the Fragment once the exercise has been updated
-                                    refreshFragment();
-                                }
-
-                            }
-                        });
-
-                        builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-
-                        builder.show();
-                        return true;
-                    }
                     default:
                         return super.onContextItemSelected(item);
                 } // end switch
