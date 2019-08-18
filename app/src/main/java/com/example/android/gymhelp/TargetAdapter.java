@@ -30,33 +30,33 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
         MainActivity activity = (MainActivity) mContext;
 
         if (position == Constants.CHEST) {
-            //return new ChestFragment();
             TargetFragment fragment = TargetFragment.createInstance(Constants.CHEST);
             activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.CHEST));
             return fragment;
         } else if (position == Constants.LEGS) {
-            //return new LegsFragment();
             TargetFragment fragment = TargetFragment.createInstance(Constants.LEGS);
             activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.LEGS));
             return fragment;
         } else if (position == Constants.BACK) {
-            //return new BackFragment();
             TargetFragment fragment = TargetFragment.createInstance(Constants.BACK);
             activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.BACK));
             return fragment;
         } else if (position == Constants.SHOULDERS) {
-            //return new ShouldersFragment();
             TargetFragment fragment = TargetFragment.createInstance(Constants.SHOULDERS);
             activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.SHOULDERS));
             return fragment;
         } else if (position == Constants.ARMS){
-            //return new ArmsFragment();
             TargetFragment fragment = TargetFragment.createInstance(Constants.ARMS);
             activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.ARMS));
             return fragment;
-        } else { //return new AbsFragment();
+        } else if (position == Constants.ABS){
             TargetFragment fragment = TargetFragment.createInstance(Constants.ABS);
             activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.ABS));
+            return fragment;
+        }
+        else {
+            TargetFragment fragment = TargetFragment.createInstance(Constants.COMPOUND);
+            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.COMPOUND));
             return fragment;
         }
 
@@ -82,6 +82,9 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
             return mContext.getString(R.string.target_shoulders);
         } else if (position == Constants.ARMS){
             return mContext.getString(R.string.target_arms);
-        } else { return mContext.getString(R.string.target_abs); }
+        } else if (position == Constants.ABS){
+            return mContext.getString(R.string.target_abs);
+        }
+        else { return mContext.getString(R.string.target_compound);}
     }
 }
