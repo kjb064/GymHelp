@@ -13,10 +13,7 @@ import java.util.Calendar;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    // TODO:
-    // Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
-    // Consolidate "getExercise" methods into one?
-    // Consolidate the last part of the createDefault___Table where exercises are added into one method?
+    // TODO: Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
 
     private static final String DATABASE_NAME = "GymHelper.db";
     private static final String TABLE_NAME = "defaultWorkout";
@@ -27,14 +24,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATE = "date";
     private static final String IMAGE_PATH = "imagePath";
     private static final String EXERCISE_TARGET = "target";
-
     private static SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
-    private Context context;
-
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 20);     // Most recent version: 20
-        this.context = context;
     }
 
     @Override
@@ -51,6 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createDefaultPPLTable(db);
 
     } // end onCreate
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -83,10 +77,53 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exercises;
     }
 
-    public ArrayList getAllExercises(){
+    /*
+     * This method is called by the onQueryTextChange method for the app's SearchView. Given a query, it
+     * returns a Cursor of the rows in the table with a "name" field similar to the query.
+     */
+    public Cursor getQuerySuggestions(String query){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT rowid _id, " + EXERCISE_NAME + " FROM " + TABLE_NAME +
+                " WHERE " + EXERCISE_NAME + " LIKE '%" + query + "%';", null);
+        return c;
+    }
+
+    /*
+     * Given the ID of the desired target (e.g. Chest, Arms, Abs, etc.), returns an ArrayList of all the
+     * exercises in the table associated with that ID.
+     */
+    public ArrayList getSelectedExercises(int targetID){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + ";", null);
+        String sql = "SELECT * FROM " + TABLE_NAME;
+
+        switch (targetID){
+            case Constants.CHEST:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.CHEST + ";";
+                break;
+            case Constants.LEGS:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.LEGS + ";";
+                break;
+            case Constants.BACK:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.BACK + ";";
+                break;
+            case Constants.SHOULDERS:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.SHOULDERS + ";";
+                break;
+            case Constants.ARMS:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.ARMS + ";";
+                break;
+            case Constants.ABS:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.ABS + ";";
+                break;
+            case Constants.COMPOUND:
+                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.COMPOUND + ";";
+                break;
+            default: // Get all exercises in the table
+                sql += ";";
+                break;
+        }
+        Cursor c = db.rawQuery(sql, null);
 
         if(c.moveToFirst()){
             do{
@@ -102,162 +139,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         c.close();
         return exercises;
-    } // end getAllExercises
+    } // end getSelectedExercises
 
-    public ArrayList getChestExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.CHEST + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
 
-        c.close();
-        return exercises;
-    } // end getChestExercises
-
-    public ArrayList getLegExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.LEGS + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-
-    } // end getLegExercises
-
-    public ArrayList getBackExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.BACK + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-    } // end getBackExercises
-
-    public ArrayList getShoulderExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.SHOULDERS + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-    } // end getShoulderExercises
-
-    public ArrayList getArmExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.ARMS + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-    } // end getArmExercises
-
-    public ArrayList getAbsExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                                   " WHERE " + EXERCISE_TARGET + " = " + Constants.ABS + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-    } // end getAbsExercises
-
-    public ArrayList getCompoundExercises(){
-        ArrayList<Exercise> exercises = new ArrayList<Exercise>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
-                " WHERE " + EXERCISE_TARGET + " = " + Constants.COMPOUND + ";", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        return exercises;
-    } // end getCompoundExercises
-
+    /*
+     * Updates an exercise's weight in the table after the user has changed it.
+     */
     public void updateExerciseWeight(int exerciseID, float weight){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Calendar calendar = Calendar.getInstance();
         String currentDate = formatter.format(calendar.getTime());
-        Log.d("Date", currentDate);
 
         String sql = "UPDATE " + TABLE_NAME +
                 " SET " + WEIGHT + " = " + weight + ", " +
@@ -266,6 +158,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(sql);
     } // end updateExerciseWeight
 
+    /*
+     * Adds an exercise to the table.
+     */
     public void addExercise(Exercise newExercise){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -276,12 +171,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(IMAGE_PATH, newExercise.getImageResourcePath());
         values.put(EXERCISE_TARGET, newExercise.getExerciseTarget());
         db.insert(TABLE_NAME, null, values);
-
     } // end addExercise
 
-    public void deleteExercise(int exerciseID){
-        Log.d("Delete", "Deleting item pos= " + exerciseID);
 
+    /*
+     * Deletes an exercise from the table upon the user's confirmation of their desire to do so.
+     */
+    public void deleteExercise(int exerciseID){
         // Check if there's an image associated with the item to delete. If so, delete the image.
             // Note: This will ONLY delete an image taken using the "Take Image" button when adding a new
             // exercise. An image that was already on the device and was added using the "Add Image"
@@ -317,6 +213,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     } // end deleteExercise
 
+    /*
+     * Called when the user un-checks the CheckBox of the add_exercise_dialog layout while either adding
+     * or editing an exercise. Only deletes images that were saved to the app's internal storage (i.e. taken
+     * by the camera upon selecting the "Take Photo" button).
+     */
     public void deleteExerciseImage(Exercise exercise){
         // Delete the image if possible
         String path = exercise.getImageResourcePath();
@@ -336,7 +237,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues args = new ContentValues();
         args.putNull(IMAGE_PATH);
         db.update(TABLE_NAME, args, ID + " = " + exercise.getExerciseID(), null);
-    }
+    } // end deleteExerciseImage
 
     /*
     *   Called after the user requests an edit to an exercise. Updates the exercise's data
@@ -402,6 +303,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     } // end updateExercise
 
+    /*
+     * The PPL routine below was retrieved from:
+     * https://www.reddit.com/r/Fitness/comments/37ylk5/a_linear_progression_based_ppl_program_for/
+     */
     private void createDefaultPPLTable(SQLiteDatabase db){
         ContentValues values = new ContentValues();
         final ArrayList<Exercise> exercises = new ArrayList<Exercise>();
@@ -513,6 +418,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     } // end createDefaultPPLTable
 
+    /*
+     * The cutting routine below was retrieved from:
+     * https://www.bodybuilding.com/content/ryan-hughes-cutting-program.html
+     */
     private void createDefaultCuttingTable(SQLiteDatabase db){
         ContentValues values = new ContentValues();
         final ArrayList<Exercise> exercises = new ArrayList<Exercise>();
