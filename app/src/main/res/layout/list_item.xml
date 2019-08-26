@@ -12,7 +12,9 @@
         android:id="@+id/image"
         android:layout_width="@dimen/list_item_height"
         android:layout_height="@dimen/list_item_height"
-        android:scaleType="fitXY"/>
+        android:scaleType="fitXY"
+        android:background="@drawable/list_item_image_background"
+        android:cropToPadding="true"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
