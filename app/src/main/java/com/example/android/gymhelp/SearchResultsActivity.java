@@ -3,9 +3,12 @@ package com.example.android.gymhelp;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,46 +20,57 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 
 public class SearchResultsActivity extends BaseActivity {
-
-    // TODO: Implement search suggestions
 
     private ExerciseAdapter adapter;
     private ListView listView;
     private String query;
     private ArrayList<Exercise> exercises;
     private DatabaseHelper db;
-    private CheckBox checkBox;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.exercise_list);
+        listView = (ListView) findViewById(R.id.list);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);  // Adds "back arrow" to top-left of ActionBar
 
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             query = intent.getStringExtra(SearchManager.QUERY);
+            query = query.trim();   // remove any leading/trailing whitespace
 
-            //use the query to search
+            // Use the query to search
             db = new DatabaseHelper(this);
             exercises = db.getQueryResults(query);
 
-            adapter = new ExerciseAdapter(this, exercises, R.color.title_color);
-            listView = (ListView) findViewById(R.id.list);
+            // Link adapter to ListView if results were found. Otherwise, notify if no results were found.
+            if(exercises.size() > 0){
+                adapter = new ExerciseAdapter(this, exercises, R.color.title_color);
 
-            registerForContextMenu(listView);
+                registerForContextMenu(listView);
 
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new ExerciseClickListener(listView, this, Constants.NO_FRAGMENT_ID));
-
-            // TODO: Notify if no results??
-
+                listView.setAdapter(adapter);
+                listView.setOnItemClickListener(new ExerciseClickListener(listView, this, Constants.NO_FRAGMENT_ID));
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "No results for query '" + query + "'.", Toast.LENGTH_SHORT).show();
+            }
 
         }
     } // end onCreate
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Finish (close) this activity once the back button (arrow) is selected from the ActionBar
+        finish();
+        return super.onOptionsItemSelected(item);
+
+    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -70,7 +84,7 @@ public class SearchResultsActivity extends BaseActivity {
     public boolean onContextItemSelected(MenuItem item) {
         final AdapterView.AdapterContextMenuInfo info =
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        final Exercise exercise = exercises.get((int) info.id);
+        final Exercise exercise = exercises.get((int) info.id);     // get the exercise selected
 
         switch (item.getItemId()){
             case Constants.READ_FULL_ID: {
@@ -109,17 +123,17 @@ public class SearchResultsActivity extends BaseActivity {
                 builder.setTitle("Edit " + exercise.getExerciseName());
 
                 LayoutInflater inflater = getLayoutInflater();
-                final View dialoglayout = inflater.inflate(R.layout.add_exercise_dialog, null);
-                builder.setView(dialoglayout);
+                dialogLayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+                builder.setView(dialogLayout);
 
-                checkBox = (CheckBox) dialoglayout.findViewById(R.id.photo_check_box);
+                checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if(!isChecked){
                             db.deleteExerciseImage(exercise);
                             exercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
-                            MainActivity.currentPhotoPath = "";
+                            currentPhotoPath = "";
                             checkBox.setClickable(false);
                             checkBox.setText(R.string.no_photo_selected);
                         }
@@ -132,13 +146,12 @@ public class SearchResultsActivity extends BaseActivity {
                 });
 
                 if(exercise.hasImagePath()){
-
                     checkBox.setChecked(true);
                 }
 
-                final EditText nameEditText = (EditText) dialoglayout.findViewById(R.id.name_edit_text);
+                final EditText nameEditText = (EditText) dialogLayout.findViewById(R.id.name_edit_text);
                 nameEditText.setText(exercise.getExerciseName());
-                final EditText setsRepsEditText = (EditText) dialoglayout.findViewById(R.id.sets_reps_edit_text);
+                final EditText setsRepsEditText = (EditText) dialogLayout.findViewById(R.id.sets_reps_edit_text);
                 setsRepsEditText.setText(exercise.getSetsAndReps());
 
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -156,9 +169,9 @@ public class SearchResultsActivity extends BaseActivity {
                             newExercise.setExerciseID(exercise.getExerciseID());
 
                             // If a new photo has been selected/taken, update the path too.
-                            if (!MainActivity.currentPhotoPath.isEmpty()) {
-                                newExercise.setImageResourcePath(MainActivity.currentPhotoPath);
-                                MainActivity.currentPhotoPath = "";
+                            if (!currentPhotoPath.isEmpty()) {
+                                newExercise.setImageResourcePath(currentPhotoPath);
+                                currentPhotoPath = "";
                             } else {
                                 // Otherwise, leave the path the same.
                                 newExercise.setImageResourcePath(exercise.getImageResourcePath());
@@ -217,12 +230,31 @@ public class SearchResultsActivity extends BaseActivity {
         }
     } // end onContextItemSelected
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+            if(dialogLayout != null) {
+                checkBox.setChecked(true);
+            }
+        }
+        // TODO: Verify the selected file is a valid type?
+        else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
+            /*The result returns the Uri ("address") of the selected picture. */
+            Uri imageUri = data.getData();
+            currentPhotoPath = getPath(imageUri);
+
+            if(dialogLayout != null) {
+                checkBox.setChecked(true);
+            }
+        }
+    } // end onActivityResult
+
     /*
     * Called when the ListView of this Activity needs to be updated to reflect a change in the data
     * displayed.
      */
     public void refreshSearchResults(){
-        //DatabaseHelper db = new DatabaseHelper(this);
         exercises = db.getQueryResults(query);
         adapter.clear();
         adapter.addAll(exercises);
