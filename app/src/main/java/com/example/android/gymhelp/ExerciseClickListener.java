@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,16 +31,25 @@ public class ExerciseClickListener implements AdapterView.OnItemClickListener {
         builder.setTitle(exercise.getExerciseName());
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View dialoglayout = inflater.inflate(R.layout.custom_alertdialog, null);
+        final View dialogLayout = inflater.inflate(R.layout.custom_alertdialog, null);
 
-        builder.setView(dialoglayout);
-        final NumberPicker picker = (NumberPicker) dialoglayout.findViewById(R.id.weight_picker);
+        builder.setView(dialogLayout);
+        final NumberPicker picker = (NumberPicker) dialogLayout.findViewById(R.id.weight_picker);
         picker.setMaxValue(1000);
         picker.setMinValue(0);
+        if( (int) exercise.getRecentWeight() > 0){
+            picker.setValue((int) exercise.getRecentWeight());
+        }
 
-        final NumberPicker decimalPicker = (NumberPicker) dialoglayout.findViewById(R.id.decimal_picker);
+        final NumberPicker decimalPicker = (NumberPicker) dialogLayout.findViewById(R.id.decimal_picker);
         decimalPicker.setMaxValue(9);
         decimalPicker.setMinValue(0);
+
+        int decimalOnly = (int) ((exercise.getRecentWeight() - (float) Math.floor(exercise.getRecentWeight())) * 10);
+        if(decimalOnly > 0){
+            decimalPicker.setValue(decimalOnly);
+        }
+
         decimalPicker.setFormatter(new NumberPicker.Formatter() {
             @Override
             public String format(int value) {
@@ -77,5 +85,5 @@ public class ExerciseClickListener implements AdapterView.OnItemClickListener {
 
         builder.show();
 
-    }
+    } // end onItemClick
 }
