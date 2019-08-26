@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
@@ -52,29 +50,7 @@ public class TargetFragment extends Fragment {
     }
 
     private void fetchData(){
-        switch (getArguments().getInt(key)){
-            case Constants.CHEST:
-                ex = db.getChestExercises();
-                break;
-            case Constants.LEGS:
-                ex = db.getLegExercises();
-                break;
-            case Constants.BACK:
-                ex = db.getBackExercises();
-                break;
-            case Constants.SHOULDERS:
-                ex = db.getShoulderExercises();
-                break;
-            case Constants.ARMS:
-                ex = db.getArmExercises();
-                break;
-            case Constants.ABS:
-                ex = db.getAbsExercises();
-                break;
-            case Constants.COMPOUND:
-                ex = db.getCompoundExercises();
-                break;
-        }
+        ex = db.getSelectedExercises(getArguments().getInt(key));
     }
 
     @Nullable
@@ -94,7 +70,6 @@ public class TargetFragment extends Fragment {
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml file.
-        //final ListView listView = (ListView) rootView.findViewById(R.id.list);
         listView = (ListView) rootView.findViewById(R.id.list);
 
         registerForContextMenu(listView);
