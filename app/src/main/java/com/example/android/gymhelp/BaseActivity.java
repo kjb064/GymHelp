@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BaseActivity extends AppCompatActivity {
+
     protected DatabaseHelper myDb;
     protected TabLayout tabLayout;
     protected TargetAdapter adapter;
@@ -47,6 +48,10 @@ public class BaseActivity extends AppCompatActivity {
         myDb = new DatabaseHelper(this);
     } // end onCreate
 
+    /*
+     * This method is called when the FloatingActionButton is clicked to add a new exercise to the currently
+     * displayed TargetFragment.
+     */
     public void onClickAddButton(View view){
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -94,7 +99,7 @@ public class BaseActivity extends AppCompatActivity {
                         ((TargetFragment) fragment).resetFragmentData();
                     }
                     else{
-                        Log.d("hello", "fragment is null");
+                        Log.d("Null Fragment", "fragment is null");
                     }
                 }
             }
@@ -110,6 +115,11 @@ public class BaseActivity extends AppCompatActivity {
         builder.show();
     } // end onClickAddButton
 
+    /*
+     * This method is called when the "Add Photo" button of add_exercise_dialog layout is clicked.
+     * It creates an intent to bring the user to the gallery (assuming permission to do so has already
+     * been granted). Only images are selectable from the gallery.
+     */
     public void onClickAddPhotoButton(View view){
 
         // Verify that permission to read external storage has been granted
@@ -120,6 +130,7 @@ public class BaseActivity extends AppCompatActivity {
             Intent gallery =
                     new Intent(Intent.ACTION_PICK,
                             android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            gallery.setType("image/*");
             startActivityForResult(gallery, PICK_IMAGE);
         }
         else {
@@ -129,6 +140,9 @@ public class BaseActivity extends AppCompatActivity {
     } // end onClickAddPhotoButton
 
 
+    /*
+     * Given a file's URI, returns the file's path on the device.
+     */
     public String getPath(Uri uri) {
         String[] projection = { MediaStore.Images.Media.DATA };
         Cursor cursor = managedQuery(uri, projection, null, null, null);
@@ -138,9 +152,14 @@ public class BaseActivity extends AppCompatActivity {
         return cursor.getString(column_index);
     } // end getPath
 
+    /*
+     * This method is called when the "Take Photo" button of the add_exercise_dialog layout is clicked.
+     * It creates an intent to load the device's camera, assuming it exists.
+     */
     public void onClickTakePhotoButton(View view){
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
@@ -163,6 +182,10 @@ public class BaseActivity extends AppCompatActivity {
 
     } // end onClickTakePhotoButton
 
+    /*
+     * This method is called by onClickTakePhotoButton to create a File for a photo taken by the camera.
+     * The files created by this method have unique names due to the use of a timestamp.
+     */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -180,6 +203,11 @@ public class BaseActivity extends AppCompatActivity {
 
     } // end createImageFile
 
+    /*
+     * This method will be called the first time the user ever tries to click the "Add Photo" button.
+     * A dialog asking the user for permission to access their device's files will be displayed with the
+     * options to agree or decline.
+     */
     private void requestStoragePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
