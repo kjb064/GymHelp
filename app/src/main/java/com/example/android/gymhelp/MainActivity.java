@@ -4,10 +4,13 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
@@ -15,11 +18,10 @@ import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import java.io.File;
-import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity {
 
-    private ArrayList<Exercise> suggestions;
+    private String searchText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,11 @@ public class MainActivity extends BaseActivity {
         refreshMainActivity();
     }
 
+    /*
+     * Resets the data contained within the current TargetFragment (i.e. the one currently visible in the
+     * Main Activity). This method is called after the Main Activity is restarted, which is required to
+     * reflect any changes made to the data from the SearchResultsActivity.
+     */
     private void refreshMainActivity(){
         TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
                 .findFragmentByTag(Integer.toString(tabLayout.getSelectedTabPosition()));
@@ -63,7 +70,7 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.search_menu, menu);
         final MenuItem search = menu.findItem(R.id.search);
@@ -73,7 +80,30 @@ public class MainActivity extends BaseActivity {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchResultsActivity.class)));
         searchView.setQueryHint(getResources().getString(R.string.search_hint));
-        /*searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+        final CursorAdapter suggestionsAdapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.hint_row,
+                null,
+                new String[]{"name"},
+                new int[]{R.id.row_text_view},
+                0);
+
+        searchView.setSuggestionsAdapter(suggestionsAdapter);
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                Cursor c = searchView.getSuggestionsAdapter().getCursor();
+                c.moveToPosition(position);
+                searchView.setQuery(c.getString(1), true);
+                return true;
+            }
+        });
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -81,11 +111,27 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                DatabaseHelper db = new DatabaseHelper(getApplicationContext());
-                suggestions = db.getQueryResults(newText);
-                return false;
+                // Avoid searching for exact query twice (specifically, the below if statement
+                // prevents the issue of submitting the query twice when a keyboard autocomplete suggestion
+                // is selected while input is being provided to the SearchView.
+                if(!searchText.equals(newText.trim()) && !newText.isEmpty()) {
+                    newText = newText.trim();   // Remove leading/trailing whitespace
+                    searchText = newText;
+                    Cursor c = myDb.getQuerySuggestions(newText);
+
+                    if (c.getCount() > 0) {
+                        suggestionsAdapter.swapCursor(c);
+                        suggestionsAdapter.notifyDataSetChanged();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                else{
+                    return false;
+                }
             }
-        });*/
+        });
         return true;
     } // end onCreateOptionsMenu
 
@@ -95,6 +141,7 @@ public class MainActivity extends BaseActivity {
 
         int tabPosition = tabLayout.getSelectedTabPosition();
 
+        // Below is for a picture being successfully taken by the camera on the device.
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             if(dialogLayout != null) {
                 checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
@@ -108,9 +155,9 @@ public class MainActivity extends BaseActivity {
                             if (!currentPhotoPath.isEmpty()) {
                                 File deleteFile = new File(currentPhotoPath);
                                 if (deleteFile.delete()) {
-                                    Log.d("Delete", "Successfully deleted file at " + currentPhotoPath);
+                                    Log.d("MA: Delete", "Successfully deleted file at " + currentPhotoPath);
                                 } else {
-                                    Log.d("Delete", "Could not delete file at " + currentPhotoPath);
+                                    Log.d("MA: Delete", "Could not delete file at " + currentPhotoPath);
                                 }
 
                                 currentPhotoPath = "";
@@ -131,11 +178,12 @@ public class MainActivity extends BaseActivity {
                 }
             }
         }
+        // TODO: Verify the selected file is a valid type?
+        // Below is for a picture successfully being selected from the device's gallery.
         else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
             /*The result returns the Uri ("address") of the selected picture. */
             Uri imageUri = data.getData();
             currentPhotoPath = getPath(imageUri);
-            Log.d("Path", "" + currentPhotoPath);
             if(dialogLayout != null) {
                 checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setClickable(true);
