@@ -1,16 +1,14 @@
 package com.example.android.gymhelp;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ExerciseAdapter extends ArrayAdapter<Exercise> {
@@ -100,7 +97,35 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             bmOptions.inSampleSize = scaleFactor;
             bmOptions.inPurgeable = true;
 
+            // Determine the orientation, adjust if necessary
+            String orientString;
+            int orientation;
+            int rotationAngle = 0;
+            try {
+                ExifInterface exifInterface = new ExifInterface(currentExercise.getImageResourcePath());
+                orientString = exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION);
+                orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+
+                switch (orientation){
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        rotationAngle = 90;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        rotationAngle = 180;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                         rotationAngle = 270;
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Bitmap bitmap = BitmapFactory.decodeFile(currentExercise.getImageResourcePath(), bmOptions);
+            Matrix matrix = new Matrix();
+            matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bmOptions.outWidth, bmOptions.outHeight, matrix, true);
+
             if(bitmap != null) {
                 iconView.setImageBitmap(bitmap);
             }
@@ -132,7 +157,6 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // Return the whole list item layout
         // so that it can be shown in the ListView
         return listItemView;
-    }
-
+    } // end getView
 
 }
