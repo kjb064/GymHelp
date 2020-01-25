@@ -24,10 +24,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATE = "date";
     private static final String IMAGE_PATH = "imagePath";
     private static final String EXERCISE_TARGET = "target";
+    private static final String INCREASE_WEIGHT_FLAG = "flag";
     private static SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 20);     // Most recent version: 20
+        super(context, DATABASE_NAME, null, 27);     // Most recent version: 27
     }
 
     @Override
@@ -39,17 +40,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + SETS_REPS + " TEXT, "
                 + DATE + " TEXT, "
                 + IMAGE_PATH + " TEXT, "
-                + EXERCISE_TARGET + " INTEGER" + ")" );
+                + EXERCISE_TARGET + " INTEGER, "
+                + INCREASE_WEIGHT_FLAG + " INTEGER" + ")" );
 
-        createDefaultPPLTable(db);
+        createModifiedPPLTable(db);
+        //createDefaultPPLTable(db);
 
     } // end onCreate
 
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
+        //db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        //onCreate(db);
+
+//        db.execSQL( "CREATE TABLE tempTable"
+//                + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+//                + EXERCISE_NAME + " TEXT, "
+//                + WEIGHT + " FLOAT, "
+//                + SETS_REPS + " TEXT, "
+//                + DATE + " TEXT, "
+//                + IMAGE_PATH + " TEXT, "
+//                + EXERCISE_TARGET + " INTEGER, "
+//                + INCREASE_WEIGHT_FLAG + " INTEGER" + ")" );
+//        db.execSQL("INSERT INTO tempTable"
+//        + " ( " + ID + ", " + EXERCISE_NAME + ", " + WEIGHT + ", " + SETS_REPS + ", " + DATE +
+//                ", " + IMAGE_PATH + ", " + EXERCISE_TARGET + ")"
+//        + " SELECT " + ID + ", " + EXERCISE_NAME + ", " + WEIGHT + ", " +SETS_REPS + ", "
+//                + DATE + ", " + IMAGE_PATH+ ", " + EXERCISE_TARGET + " FROM " + TABLE_NAME);
+//        db.execSQL("DROP TABLE " + TABLE_NAME);
+//        db.execSQL("ALTER TABLE tempTable RENAME TO " + TABLE_NAME);
+//        db.execSQL("UPDATE " + TABLE_NAME + " SET " + INCREASE_WEIGHT_FLAG + " = 0");
+
     }
 
     /*
@@ -69,7 +91,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String sets = c.getString(3);
                 String date = c.getString(4);
                 String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
+                int increaseWeightFlag = c.getInt(7);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date, increaseWeightFlag));
             }while(c.moveToNext());
         }
 
@@ -133,7 +156,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String sets = c.getString(3);
                 String date = c.getString(4);
                 String imagePath = c.getString(5);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date));
+                int increaseWeightFlag = c.getInt(7);
+                exercises.add(new Exercise(id, name, sets, weight, imagePath, date, increaseWeightFlag));
             }while(c.moveToNext());
         }
 
@@ -170,6 +194,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DATE, Constants.DEFAULT_DATE);
         values.put(IMAGE_PATH, newExercise.getImageResourcePath());
         values.put(EXERCISE_TARGET, newExercise.getExerciseTarget());
+        values.put(INCREASE_WEIGHT_FLAG, newExercise.getFlaggedForIncrease());
         db.insert(TABLE_NAME, null, values);
     } // end addExercise
 
@@ -303,6 +328,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     } // end updateExercise
 
+    public void updateExerciseFlag(Exercise exercise){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sql = "UPDATE " + TABLE_NAME + " SET " + INCREASE_WEIGHT_FLAG + " = " + exercise.getFlaggedForIncrease()
+                + " WHERE " + ID + " = " + exercise.getExerciseID();
+        db.execSQL(sql);
+    }
+
     /*
      * The PPL routine below was retrieved from:
      * https://www.reddit.com/r/Fitness/comments/37ylk5/a_linear_progression_based_ppl_program_for/
@@ -402,7 +434,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "3x8-12",
                 0,
                 Constants.LEGS));
-        exercises.add(new Exercise("Calf Raises",
+        exercises.add(new Exercise("Seated Calf Raises",
                 "5x8-12",
                 0,
                 Constants.LEGS));
@@ -417,6 +449,135 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insert(TABLE_NAME, null, values);
         }
     } // end createDefaultPPLTable
+
+    private void createModifiedPPLTable(SQLiteDatabase db){
+        createDefaultPPLTable(db);
+        ContentValues values = new ContentValues();
+        final ArrayList<Exercise> exercises = new ArrayList<Exercise>();
+
+        /*Chest*/
+        exercises.add(new Exercise("Dumbbell Bench Press",
+                "4x5, 1x5+ OR 3x8-12",
+                50,
+                Constants.CHEST));
+        exercises.add(new Exercise("Chest Press Machine",
+                "4x5, 1x5+ OR 3x8-12",
+                40,
+                Constants.CHEST));
+        exercises.add(new Exercise("Incline Press Machine",
+                "3x8-12",
+                40,
+                Constants.CHEST));
+        exercises.add(new Exercise("Dumbbell Reverse Grip Bench Press",
+                "4x8-12",
+                35,
+                Constants.CHEST));
+        exercises.add(new Exercise("Pec Fly Machine",
+                "3x8-12",
+                65,
+                Constants.CHEST));
+
+        /*Legs*/
+        exercises.add(new Exercise("Lunges",
+                "3x8-12",
+                25,
+                Constants.LEGS));
+        exercises.add(new Exercise("Goblet Squats",
+                "3x8-12",
+                55,
+                Constants.LEGS));
+        exercises.add(new Exercise("Dumbbell Calf Raises",
+                "5x8-12",
+                50,
+                Constants.LEGS));
+
+        /*Back*/
+        exercises.add(new Exercise("One Arm Dumbbell Row",
+                "3x8-12",
+                40,
+                Constants.BACK));
+        exercises.add(new Exercise("Diverging Lat Pulldown",
+                "3x8-12",
+                110,
+                Constants.BACK));
+        exercises.add(new Exercise("Diverging Seated Row",
+                "3x8-12",
+                110,
+                Constants.BACK));
+
+        /*Shoulders*/
+        exercises.add(new Exercise("Smith Machine Shrugs",
+                "3x8-12",
+                35,
+                Constants.SHOULDERS));
+        exercises.add(new Exercise("Dumbbell Shoulder Shrugs",
+                "3x15-20",
+                55,
+                Constants.SHOULDERS));
+
+        /*Arms*/
+        exercises.add(new Exercise("Triceps Pulldowns",
+                "3x8-12",
+                60,
+                Constants.ARMS));
+        exercises.add(new Exercise("Skull Crushers",
+                "3x8-12",
+                30,
+                Constants.ARMS));
+        exercises.add(new Exercise("Dumbbell Skull Crushers",
+                "3x8-12",
+                20,
+                Constants.ARMS));
+        exercises.add(new Exercise("EZ Bar Curls",
+                "4x8-12",
+                (float)17.5,
+                Constants.ARMS));
+
+        /*Abs*/
+        exercises.add(new Exercise("Abdominal Machine",
+                "3x12-15",
+                100,
+                Constants.ABS));
+        exercises.add(new Exercise("Side Bend",
+                "3x12-15",
+                40,
+                Constants.ABS));
+        exercises.add(new Exercise("Decline Weighted Crunch",
+                "3x8-12",
+                25,
+                Constants.ABS));
+
+        /*Compound*/
+        exercises.add(new Exercise("Romanian Deadlift (Dumbbells)",
+                "3x8-12",
+                45,
+                Constants.COMPOUND));
+        exercises.add(new Exercise("Dumbbell Overhead Press",
+                "4x5, 1x5+ OR 3x8-12",
+                40,
+                Constants.COMPOUND));
+        exercises.add(new Exercise("Deadlifts (Dumbbells)",
+                "1x5+",
+                40,
+                Constants.COMPOUND));
+        exercises.add(new Exercise("Barbell Stiff Legged Deadlift",
+                "3x8-12",
+                25,
+                Constants.COMPOUND));
+        exercises.add(new Exercise("Dumbbell Stiff Legged Deadlift",
+                "3x8-12",
+                35,
+                Constants.COMPOUND));
+
+        for(int i = 0; i < exercises.size(); i++){
+            values.put(EXERCISE_NAME, exercises.get(i).getExerciseName());
+            values.put(WEIGHT, exercises.get(i).getRecentWeight());
+            values.put(SETS_REPS, exercises.get(i).getSetsAndReps());
+            values.put(DATE, Constants.DEFAULT_DATE);
+            values.put(EXERCISE_TARGET, exercises.get(i).getExerciseTarget());
+            db.insert(TABLE_NAME, null, values);
+        }
+    }
 
     /*
      * The cutting routine below was retrieved from:

@@ -78,6 +78,7 @@ public class SearchResultsActivity extends BaseActivity {
         menu.add(0, Constants.READ_FULL_ID, 0, R.string.menu_read_full);
         menu.add(0, Constants.EDIT_ID, 0, R.string.menu_edit);
         menu.add(0, Constants.DELETE_ID, 0, R.string.menu_delete);
+        menu.add(0, Constants.FLAG_FOR_INCREASE, 0, R.string.menu_flag_for_increase);
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.media.ExifInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,6 +73,10 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         TextView dateTextView = (TextView) listItemView.findViewById(R.id.date_text_view);
         String date = context.getResources().getString(R.string.weight_updated) + " " + currentExercise.getDate();
         dateTextView.setText(date);
+
+        TextView increaseWeightTextView = listItemView.findViewById(R.id.increase_weight_text_view);
+        int visibility = currentExercise.getFlaggedForIncrease() == 1 ? View.VISIBLE : View.INVISIBLE;
+        increaseWeightTextView.setVisibility(visibility);
 
         // Find the ImageView in the list_item.xml layout with the ID "image"
         ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);

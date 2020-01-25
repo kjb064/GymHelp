@@ -9,6 +9,7 @@ public class Exercise {
     private float recentWeight = 0;
     private int exerciseTarget;
     private String date = Constants.DEFAULT_DATE;
+    private int flaggedForIncrease = 0;
 
     /*
     *   Used within the MainActivity's "onClickAddButton" method (after which the exercise
@@ -38,13 +39,14 @@ public class Exercise {
     * to the corresponding "target" fragment.
     * */
     public Exercise(int exerciseID, String exerciseName, String setsAndReps, float recentWeight,
-                    String imageResourcePath, String date){
+                    String imageResourcePath, String date, int flag){
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
         this.imageResourcePath = imageResourcePath;
         this.date = date;
+        this.flaggedForIncrease = flag;
     }
 
     public int getExerciseID(){
@@ -91,5 +93,13 @@ public class Exercise {
 
     public String getImageResourcePath(){
         return this.imageResourcePath;
+    }
+
+    public void setFlaggedForIncrease(int flag){
+        this.flaggedForIncrease = flag;
+    }
+
+    public int getFlaggedForIncrease(){
+        return this.flaggedForIncrease;
     }
 }

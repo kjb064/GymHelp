@@ -19,4 +19,5 @@ public class Constants {
     public static final int READ_FULL_ID = Menu.FIRST;
     public static final int DELETE_ID = Menu.FIRST + 1;
     public static final int EDIT_ID = Menu.FIRST + 2;
+    public static final int FLAG_FOR_INCREASE = Menu.FIRST + 3;
 }

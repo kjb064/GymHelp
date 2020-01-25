@@ -34,14 +34,14 @@ public class ExerciseClickListener implements AdapterView.OnItemClickListener {
         final View dialogLayout = inflater.inflate(R.layout.custom_alertdialog, null);
 
         builder.setView(dialogLayout);
-        final NumberPicker picker = (NumberPicker) dialogLayout.findViewById(R.id.weight_picker);
-        picker.setMaxValue(1000);
+        final NumberPicker picker = dialogLayout.findViewById(R.id.weight_picker);
+        picker.setMaxValue(350);
         picker.setMinValue(0);
         if( (int) exercise.getRecentWeight() > 0){
             picker.setValue((int) exercise.getRecentWeight());
         }
 
-        final NumberPicker decimalPicker = (NumberPicker) dialogLayout.findViewById(R.id.decimal_picker);
+        final NumberPicker decimalPicker = dialogLayout.findViewById(R.id.decimal_picker);
         decimalPicker.setMaxValue(9);
         decimalPicker.setMinValue(0);
 

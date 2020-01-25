@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import static com.example.android.gymhelp.Constants.DELETE_ID;
 import static com.example.android.gymhelp.Constants.EDIT_ID;
 import static com.example.android.gymhelp.Constants.READ_FULL_ID;
+import static com.example.android.gymhelp.Constants.FLAG_FOR_INCREASE;
 
 public class TargetFragment extends Fragment {
 
@@ -89,6 +90,7 @@ public class TargetFragment extends Fragment {
         menu.add(getArguments().getInt(key), READ_FULL_ID, 0, R.string.menu_read_full);
         menu.add(getArguments().getInt(key), EDIT_ID, 0, R.string.menu_edit);
         menu.add(getArguments().getInt(key), DELETE_ID, 0, R.string.menu_delete);
+        menu.add(getArguments().getInt(key), FLAG_FOR_INCREASE, 0, R.string.menu_flag_for_increase);
     }
 
     @Override
@@ -243,6 +245,13 @@ public class TargetFragment extends Fragment {
                         builder.show();
                         return true;
                     }
+                    case FLAG_FOR_INCREASE:
+                        int currentFlag = exercise.getFlaggedForIncrease();
+                        int newFlag = currentFlag == 0 ? 1 : 0;
+                        exercise.setFlaggedForIncrease(newFlag);
+                        db.updateExerciseFlag(exercise);
+                        refreshFragment();
+                        return true;
 
                     default:
                         return super.onContextItemSelected(item);
