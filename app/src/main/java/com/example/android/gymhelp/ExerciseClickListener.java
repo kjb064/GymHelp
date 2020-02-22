@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -30,10 +29,9 @@ public class ExerciseClickListener implements AdapterView.OnItemClickListener {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(exercise.getExerciseName());
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View dialogLayout = inflater.inflate(R.layout.custom_alertdialog, null);
-
+        final View dialogLayout = View.inflate(context, R.layout.custom_alertdialog, null);
         builder.setView(dialogLayout);
+
         final NumberPicker picker = dialogLayout.findViewById(R.id.weight_picker);
         picker.setMaxValue(350);
         picker.setMinValue(0);
@@ -70,7 +68,7 @@ public class ExerciseClickListener implements AdapterView.OnItemClickListener {
                             (TargetFragment)((AppCompatActivity) context).getSupportFragmentManager().findFragmentByTag(tag);
                     currentFragment.refreshFragment();
                 }
-                else if(tag != null && tag.equals(Constants.NO_FRAGMENT_ID)){
+                else if(tag != null){
                     ((SearchResultsActivity) context).refreshSearchResults();
                 }
 

@@ -2,6 +2,7 @@
     <string name="app_name">GymHelp</string>
 
     <string name="weight_updated">Weight Updated: </string>
+    <string name="increase_weight">Increase Weight!</string>
 
     <string name="no_photo_selected">No photo selected</string>
     <string name="photo_selected">Uncheck to remove photo</string>

@@ -3,7 +3,6 @@ package com.example.android.gymhelp;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class TargetAdapter extends FragmentStatePagerAdapter {
@@ -17,7 +16,7 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
      * @param fm is the fragment manager that will keep each fragment's state in the adapter
      *           across swipes.
      */
-    public TargetAdapter(Context context, FragmentManager fm) {
+    TargetAdapter(Context context, FragmentManager fm) {
         super(fm);
         mContext = context;
     }

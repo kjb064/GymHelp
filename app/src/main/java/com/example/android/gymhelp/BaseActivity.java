@@ -18,7 +18,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -28,7 +27,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     protected DatabaseHelper myDb;
     protected TabLayout tabLayout;
@@ -59,9 +58,8 @@ public class BaseActivity extends AppCompatActivity {
         String tabName = (String) adapter.getPageTitle(tabPosition);
         builder.setTitle("Add new " + tabName + " exercise");
 
-        LayoutInflater inflater = getLayoutInflater();
-        dialogLayout = inflater.inflate(R.layout.add_exercise_dialog, null);
-        checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+        dialogLayout = View.inflate(getApplicationContext(), R.layout.add_exercise_dialog, null);
+        checkBox = dialogLayout.findViewById(R.id.photo_check_box);
 
         builder.setView(dialogLayout);
 
@@ -69,8 +67,8 @@ public class BaseActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                EditText nameEditText = (EditText) dialogLayout.findViewById(R.id.name_edit_text);
-                EditText setsRepsEditText = (EditText) dialogLayout.findViewById(R.id.sets_reps_edit_text);
+                EditText nameEditText = dialogLayout.findViewById(R.id.name_edit_text);
+                EditText setsRepsEditText = dialogLayout.findViewById(R.id.sets_reps_edit_text);
 
                 // Check that both fields have been filled in
                 if(nameEditText.getText().toString().trim().length() == 0
@@ -128,9 +126,8 @@ public class BaseActivity extends AppCompatActivity {
 
             // Save a selected photo to app...
             Intent gallery =
-                    new Intent(Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            gallery.setType("image/*");
+                    new Intent(Intent.ACTION_PICK);
+            gallery.setDataAndType(android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI,"image/*");
             startActivityForResult(gallery, PICK_IMAGE);
         }
         else {

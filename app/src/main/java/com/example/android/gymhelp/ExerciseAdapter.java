@@ -9,7 +9,6 @@ import android.media.ExifInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +24,8 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
     private int backgroundColor;
     private Context context;
     private Resources resources;
-    private int imageID;
-    private String defaultImageName = "baseline_image_black_48dp";
 
-    public ExerciseAdapter(Context context, ArrayList<Exercise> exercises, int color) {
+    ExerciseAdapter(Context context, ArrayList<Exercise> exercises, int color) {
         // Here, we initialize the ArrayAdapter's internal storage for the context and the list.
         // the second argument is used when the ArrayAdapter is populating a single TextView.
         // Because this is a custom adapter, the adapter is not
@@ -42,6 +39,9 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
+        String defaultImageName = "baseline_image_black_48dp";
+        int imageID;
+
         // Check if the existing view is being reused, otherwise inflate the view
         View listItemView = convertView;
         if(listItemView == null) {
@@ -52,25 +52,25 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // Get the object located at this position in the list
         Exercise currentExercise = getItem(position);
 
-        TextView idTextView = (TextView) listItemView.findViewById(R.id.exercise_ID);
+        TextView idTextView = listItemView.findViewById(R.id.exercise_ID);
         idTextView.setText(Integer.toString(currentExercise.getExerciseID()));
 
         // Find the TextView in the list_item.xml layout with the ID version_name
-        TextView exerciseTextView = (TextView) listItemView.findViewById(R.id.exercise_text_view);
+        TextView exerciseTextView = listItemView.findViewById(R.id.exercise_text_view);
 
         // Get the name from the current object and
         // set this text on the name TextView
         exerciseTextView.setText(currentExercise.getExerciseName());
 
         // Find the TextView in the list_item.xml layout with the ID version_number
-        TextView setTextView = (TextView) listItemView.findViewById(R.id.set_text_view);
+        TextView setTextView = listItemView.findViewById(R.id.set_text_view);
 
         setTextView.setText(currentExercise.getSetsAndReps());
 
-        TextView weightTextView = (TextView) listItemView.findViewById(R.id.weight_text_view);
+        TextView weightTextView = listItemView.findViewById(R.id.weight_text_view);
         weightTextView.setText("Weight: " + Float.toString(currentExercise.getRecentWeight()) + " lbs.");
 
-        TextView dateTextView = (TextView) listItemView.findViewById(R.id.date_text_view);
+        TextView dateTextView = listItemView.findViewById(R.id.date_text_view);
         String date = context.getResources().getString(R.string.weight_updated) + " " + currentExercise.getDate();
         dateTextView.setText(date);
 
@@ -79,13 +79,12 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         increaseWeightTextView.setVisibility(visibility);
 
         // Find the ImageView in the list_item.xml layout with the ID "image"
-        ImageView iconView = (ImageView) listItemView.findViewById(R.id.image);
+        ImageView iconView = listItemView.findViewById(R.id.image);
 
         if(currentExercise.hasImagePath()){
 
             // Get the dimensions of the View
-            int targetW = (int) resources.getDimension(R.dimen.list_item_height);
-            int targetH = targetW;
+            int targetWidthAndHeight = (int) resources.getDimension(R.dimen.list_item_height);
 
             // Get the dimensions of the bitmap
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -95,7 +94,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             int photoH = bmOptions.outHeight;
 
             // Determine how much to scale down the image
-            int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+            int scaleFactor = Math.min(photoW/targetWidthAndHeight, photoH/targetWidthAndHeight);
 
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;

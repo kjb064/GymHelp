@@ -1,10 +1,10 @@
 package com.example.android.gymhelp;
 
-public class Exercise {
+class Exercise {
 
     private int exerciseID;
-    private String exerciseName = "";
-    private String setsAndReps = "";
+    private String exerciseName;
+    private String setsAndReps;
     private String imageResourcePath = Constants.NO_IMAGE_PROVIDED;
     private float recentWeight = 0;
     private int exerciseTarget;
@@ -17,7 +17,7 @@ public class Exercise {
     *   "onContextItemSelected" method for the "Edit" menu option (after which the exercise
     *   is passed to the DatabaseHelper's "updateExercise" method).
      */
-    public Exercise(String exerciseName, String setsAndReps, int exerciseTarget){
+    Exercise(String exerciseName, String setsAndReps, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.exerciseTarget = exerciseTarget;
@@ -26,7 +26,7 @@ public class Exercise {
     /*
      *   Used within DatabaseHelper to add the default exercises; lacks any image-related parameters
      */
-    public Exercise(String exerciseName, String setsAndReps, float recentWeight, int exerciseTarget){
+    Exercise(String exerciseName, String setsAndReps, float recentWeight, int exerciseTarget){
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
@@ -38,7 +38,7 @@ public class Exercise {
     * This constructor is used by the DatabaseHelper to create Exercise objects for an ArrayList that is passed
     * to the corresponding "target" fragment.
     * */
-    public Exercise(int exerciseID, String exerciseName, String setsAndReps, float recentWeight,
+    Exercise(int exerciseID, String exerciseName, String setsAndReps, float recentWeight,
                     String imageResourcePath, String date, int flag){
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
@@ -49,27 +49,27 @@ public class Exercise {
         this.flaggedForIncrease = flag;
     }
 
-    public int getExerciseID(){
+    int getExerciseID(){
         return this.exerciseID;
     }
 
-    public void setExerciseID(int exID){
+    void setExerciseID(int exID){
         this.exerciseID = exID;
     }
 
-    public String getExerciseName() {
+    String getExerciseName() {
         return exerciseName;
     }
 
-    public String getSetsAndReps() {
+    String getSetsAndReps() {
         return setsAndReps;
     }
 
-    public float getRecentWeight() {
+    float getRecentWeight() {
         return recentWeight;
     }
 
-    public boolean hasImagePath(){
+    boolean hasImagePath(){
         if(imageResourcePath != null){
             return (! Constants.NO_IMAGE_PROVIDED.equals(imageResourcePath));
         }
@@ -78,28 +78,29 @@ public class Exercise {
         }
     }
 
-    public String getDate() {
+    String getDate() {
         return date;
     }
-    public void setDate(String date){ this.date = date; }
 
-    public int getExerciseTarget(){ return this.exerciseTarget; }
+    //void setDate(String date){ this.date = date; }
 
-    public void setExerciseTarget(int target){ this.exerciseTarget = target; }
+    int getExerciseTarget(){ return this.exerciseTarget; }
 
-    public void setImageResourcePath(String path){
+    //void setExerciseTarget(int target){ this.exerciseTarget = target; }
+
+    void setImageResourcePath(String path){
         this.imageResourcePath = path;
     }
 
-    public String getImageResourcePath(){
+    String getImageResourcePath(){
         return this.imageResourcePath;
     }
 
-    public void setFlaggedForIncrease(int flag){
+    void setFlaggedForIncrease(int flag){
         this.flaggedForIncrease = flag;
     }
 
-    public int getFlaggedForIncrease(){
+    int getFlaggedForIncrease(){
         return this.flaggedForIncrease;
     }
 }

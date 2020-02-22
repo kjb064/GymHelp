@@ -8,13 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -34,10 +31,12 @@ public class SearchResultsActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.exercise_list);
-        listView = (ListView) findViewById(R.id.list);
+        listView = findViewById(R.id.list);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);  // Adds "back arrow" to top-left of ActionBar
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);  // Adds "back arrow" to top-left of ActionBar
+        }
 
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -92,19 +91,19 @@ public class SearchResultsActivity extends BaseActivity {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(exercise.getExerciseName());
 
-                LayoutInflater inflater = getLayoutInflater();
-                final View readFullLayout = inflater.inflate(R.layout.read_full, null);
+                //LayoutInflater inflater = getLayoutInflater();
+                final View readFullLayout = View.inflate(getApplicationContext(), R.layout.read_full, null);
                 builder.setView(readFullLayout);
 
-                final TextView fullSetsReps = (TextView) readFullLayout.findViewById(R.id.full_sets_reps);
+                final TextView fullSetsReps = readFullLayout.findViewById(R.id.full_sets_reps);
                 String text = fullSetsReps.getText() + exercise.getSetsAndReps();
                 fullSetsReps.setText(text);
 
-                final TextView fullWeight = (TextView) readFullLayout.findViewById(R.id.full_weight);
+                final TextView fullWeight = readFullLayout.findViewById(R.id.full_weight);
                 text = fullWeight.getText() + "" + exercise.getRecentWeight();
                 fullWeight.setText(text);
 
-                final TextView fullDate = (TextView) readFullLayout.findViewById(R.id.full_date);
+                final TextView fullDate = readFullLayout.findViewById(R.id.full_date);
                 text = fullDate.getText() + exercise.getDate();
                 fullDate.setText(text);
 
@@ -123,11 +122,11 @@ public class SearchResultsActivity extends BaseActivity {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Edit " + exercise.getExerciseName());
 
-                LayoutInflater inflater = getLayoutInflater();
-                dialogLayout = inflater.inflate(R.layout.add_exercise_dialog, null);
+                //LayoutInflater inflater = getLayoutInflater();
+                dialogLayout = View.inflate(getApplicationContext(), R.layout.add_exercise_dialog, null);
                 builder.setView(dialogLayout);
 
-                checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+                checkBox = dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -150,9 +149,9 @@ public class SearchResultsActivity extends BaseActivity {
                     checkBox.setChecked(true);
                 }
 
-                final EditText nameEditText = (EditText) dialogLayout.findViewById(R.id.name_edit_text);
+                final EditText nameEditText = dialogLayout.findViewById(R.id.name_edit_text);
                 nameEditText.setText(exercise.getExerciseName());
-                final EditText setsRepsEditText = (EditText) dialogLayout.findViewById(R.id.sets_reps_edit_text);
+                final EditText setsRepsEditText = dialogLayout.findViewById(R.id.sets_reps_edit_text);
                 setsRepsEditText.setText(exercise.getSetsAndReps());
 
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -226,6 +225,16 @@ public class SearchResultsActivity extends BaseActivity {
                 builder.show();
                 return true;
             }
+
+            case Constants.FLAG_FOR_INCREASE: {
+                int currentFlag = exercise.getFlaggedForIncrease();
+                int newFlag = currentFlag == 0 ? 1 : 0;
+                exercise.setFlaggedForIncrease(newFlag);
+                db.updateExerciseFlag(exercise);
+                refreshSearchResults();
+                return true;
+            }
+
             default:
                 return super.onContextItemSelected(item);
         }

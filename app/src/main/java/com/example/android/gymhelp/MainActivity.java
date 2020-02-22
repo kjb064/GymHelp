@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -15,7 +13,6 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import java.io.File;
 
@@ -32,7 +29,7 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         // Find the view pager that will allow the user to swipe between fragments
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager = findViewById(R.id.viewpager);
 
         // Create an adapter that knows which fragment should be shown on each page
         adapter = new TargetAdapter(this, getSupportFragmentManager());
@@ -41,7 +38,7 @@ public class MainActivity extends BaseActivity {
         viewPager.setAdapter(adapter);
 
         // Find the tab layout that shows the tabs
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout = findViewById(R.id.tabs);
 
         // Connect the tab layout with the view pager. This will
         //   1. Update the tab layout when the view pager is swiped
@@ -78,7 +75,9 @@ public class MainActivity extends BaseActivity {
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchResultsActivity.class)));
+        if(searchManager != null){
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchResultsActivity.class)));
+        }
         searchView.setQueryHint(getResources().getString(R.string.search_hint));
 
         final CursorAdapter suggestionsAdapter = new SimpleCursorAdapter(getApplicationContext(),
@@ -144,7 +143,7 @@ public class MainActivity extends BaseActivity {
         // Below is for a picture being successfully taken by the camera on the device.
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             if(dialogLayout != null) {
-                checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+                checkBox = dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setClickable(true);
                 checkBox.setText(R.string.photo_selected);
                 checkBox.setChecked(true);
@@ -185,7 +184,7 @@ public class MainActivity extends BaseActivity {
             Uri imageUri = data.getData();
             currentPhotoPath = getPath(imageUri);
             if(dialogLayout != null) {
-                checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+                checkBox = dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setClickable(true);
                 checkBox.setText(R.string.photo_selected);
                 checkBox.setChecked(true);
