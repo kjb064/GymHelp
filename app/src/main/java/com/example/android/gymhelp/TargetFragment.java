@@ -62,14 +62,20 @@ public class TargetFragment extends Fragment {
         }
     }
 
-    private void fetchData(){ ex = db.getSelectedExercises(getExerciseId()); }
+    private void fetchData(String sortBy){
+        if (sortBy == null) {
+            ex = db.getSelectedExercises(getExerciseId());
+        } else {
+            ex = db.getSelectedExercisesSorted(getExerciseId(), sortBy);
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         final View rootView = inflater.inflate(R.layout.exercise_list, container, false);
-        fetchData();
+        fetchData(null);
 
         // Create an {@link ArrayAdapter}, whose data source is a list of Strings. The
         // adapter knows how to create layouts for each item in the list, using the
@@ -311,11 +317,21 @@ public class TargetFragment extends Fragment {
      */
     public void resetFragmentData(){
         if(getUserVisibleHint()) {
-            fetchData();
+            fetchData(null);
             adapter.clear();
             adapter.addAll(ex);
             adapter.notifyDataSetChanged();
             listView.invalidate();
         }
     } // end resetFragmentData
+
+    public void resetFragmentDataSorted(String sortBy) {
+        if(getUserVisibleHint()) {
+            fetchData(sortBy);
+            adapter.clear();
+            adapter.addAll(ex);
+            adapter.notifyDataSetChanged();
+            listView.invalidate();
+        }
+    }
 }

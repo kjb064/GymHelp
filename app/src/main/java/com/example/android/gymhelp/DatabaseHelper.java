@@ -78,25 +78,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     *  query.
      */
     ArrayList<Exercise> getQueryResults(String query){
-        ArrayList<Exercise> exercises = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
                                     " WHERE " + EXERCISE_NAME + " LIKE '%" + query + "%';", null);
-        if(c.moveToFirst()){
-            do{
-                int id = c.getInt(0);
-                String name = c.getString(1);
-                float weight = c.getFloat(2);
-                String sets = c.getString(3);
-                String date = c.getString(4);
-                String imagePath = c.getString(5);
-                int increaseWeightFlag = c.getInt(7);
-                exercises.add(new Exercise(id, name, sets, weight, imagePath, date, increaseWeightFlag));
-            }while(c.moveToNext());
-        }
 
-        c.close();
-        return exercises;
+        return convertCursorToArrayList(c);
     }
 
     /*
@@ -109,42 +95,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " WHERE " + EXERCISE_NAME + " LIKE '%" + query + "%';", null);
     }
 
-    /*
-     * Given the ID of the desired target (e.g. Chest, Arms, Abs, etc.), returns an ArrayList of all the
-     * exercises in the table associated with that ID.
-     */
-    ArrayList<Exercise> getSelectedExercises(int targetID){
+    private ArrayList<Exercise> convertCursorToArrayList(Cursor c){
         ArrayList<Exercise> exercises = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "SELECT * FROM " + TABLE_NAME;
-
-        switch (targetID){
-            case Constants.CHEST:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.CHEST + ";";
-                break;
-            case Constants.LEGS:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.LEGS + ";";
-                break;
-            case Constants.BACK:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.BACK + ";";
-                break;
-            case Constants.SHOULDERS:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.SHOULDERS + ";";
-                break;
-            case Constants.ARMS:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.ARMS + ";";
-                break;
-            case Constants.ABS:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.ABS + ";";
-                break;
-            case Constants.COMPOUND:
-                sql += " WHERE " + EXERCISE_TARGET + " = " + Constants.COMPOUND + ";";
-                break;
-            default: // Get all exercises in the table
-                sql += ";";
-                break;
-        }
-        Cursor c = db.rawQuery(sql, null);
 
         if(c.moveToFirst()){
             do{
@@ -161,8 +113,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         c.close();
         return exercises;
+    }
+
+    /*
+     * Given the ID of the desired target (e.g. Chest, Arms, Abs, etc.), returns an ArrayList of all the
+     * exercises in the table associated with that ID.
+     */
+    ArrayList<Exercise> getSelectedExercises(int targetID){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.query(TABLE_NAME, null, EXERCISE_TARGET + " = ?", new String[] {Integer.toString(targetID)},
+                null, null, null);
+
+        return convertCursorToArrayList(c);
     } // end getSelectedExercises
 
+
+    ArrayList<Exercise> getSelectedExercisesSorted(int targetID, String sortBy){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.query(TABLE_NAME, null, EXERCISE_TARGET + " = ?", new String[] {Integer.toString(targetID)},
+                null, null, EXERCISE_NAME + sortBy);
+
+        return convertCursorToArrayList(c);
+    }
 
     /*
      * Updates an exercise's weight in the table after the user has changed it.

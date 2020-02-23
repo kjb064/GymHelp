@@ -20,4 +20,7 @@ class Constants {
     static final int DELETE_ID = Menu.FIRST + 1;
     static final int EDIT_ID = Menu.FIRST + 2;
     static final int FLAG_FOR_INCREASE = Menu.FIRST + 3;
+
+    static final String SORT_DESCENDING = " DESC";
+    static final String SORT_ASCENDING = " ASC";
 }

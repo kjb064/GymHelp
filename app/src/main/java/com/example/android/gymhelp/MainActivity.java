@@ -134,6 +134,25 @@ public class MainActivity extends BaseActivity {
         return true;
     } // end onCreateOptionsMenu
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int tabPosition = tabLayout.getSelectedTabPosition();
+        TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
+                .findFragmentByTag(Integer.toString(tabPosition));
+
+        switch (item.getItemId()) {
+            case R.id.sort_ascending:
+                targetFragment.resetFragmentDataSorted(Constants.SORT_ASCENDING);
+                break;
+            case R.id.sort_descending:
+                targetFragment.resetFragmentDataSorted(Constants.SORT_DESCENDING);
+                break;
+            case R.id.unsorted:
+                targetFragment.resetFragmentData();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -9,4 +9,16 @@
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView"/>
 
+    <item
+        android:id="@+id/sort_ascending"
+        android:title="@string/sort_ascending_title"/>
+
+    <item
+        android:id="@+id/sort_descending"
+        android:title="@string/sort_descending_title"/>
+
+    <item
+        android:id="@+id/unsorted"
+        android:title="@string/sort_unsorted_title"/>
+
 </menu>
