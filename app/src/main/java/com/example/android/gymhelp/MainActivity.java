@@ -7,18 +7,30 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CompoundButton;
+import android.widget.ListView;
+
 import java.io.File;
 
 public class MainActivity extends BaseActivity {
 
     private String searchText = "";
+    private String[] navigationDrawerItemTitles;
+    private DrawerLayout drawerLayout;
+    private ListView drawerList;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +59,82 @@ public class MainActivity extends BaseActivity {
         //      by calling onPageTitle()
         tabLayout.setupWithViewPager(viewPager);
 
+        // Set up navigation drawer and toggle (home/hamburger icon)
+        navigationDrawerItemTitles = getResources().getStringArray(R.array.navigation_drawer_items);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        drawerList = findViewById(R.id.left_drawer);
+
+        DataModel[] drawerItem = new DataModel[4];
+        drawerItem[0] = new DataModel("Workout Program 1");
+        drawerItem[1] = new DataModel("Workout Program 2");
+        drawerItem[2] = new DataModel("Workout Program 3");
+        drawerItem[3] = new DataModel(R.drawable.baseline_add_black_18dp, "Add new Program");
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+
+        DrawerItemCustomAdapter drawerAdapter = new DrawerItemCustomAdapter(this, R.layout.drawer_item_layout, drawerItem);
+        drawerList.setAdapter(drawerAdapter);
+        drawerList.setOnItemClickListener(new DrawerItemClickListener());
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+
     } // end onCreate
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        actionBarDrawerToggle.syncState();
+    }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         refreshMainActivity();
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            selectItem(position);
+        }
+
+    }
+
+    private void selectItem(int position) {
+
+//        Fragment fragment = null;
+//
+//        switch (position) {
+//            case 0:
+//                fragment = new ConnectFragment();
+//                break;
+//            case 1:
+//                fragment = new FixturesFragment();
+//                break;
+//            case 2:
+//                fragment = new TableFragment();
+//                break;
+//
+//            default:
+//                break;
+//        }
+//
+//        if (fragment != null) {
+//            FragmentManager fragmentManager = getSupportFragmentManager();
+//            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+//
+//            mDrawerList.setItemChecked(position, true);
+//            mDrawerList.setSelection(position);
+//            setTitle(mNavigationDrawerItemTitles[position]);
+//            mDrawerLayout.closeDrawer(mDrawerList);
+//
+//        } else {
+//            Log.e("MainActivity", "Error in creating fragment");
+//        }
     }
 
     /*
@@ -150,6 +232,13 @@ public class MainActivity extends BaseActivity {
             case R.id.unsorted:
                 targetFragment.resetFragmentData();
                 break;
+            case android.R.id.home:
+                if (drawerLayout.isDrawerOpen(drawerList)) {
+                    drawerLayout.closeDrawer(drawerList);
+                }
+                else {
+                    drawerLayout.openDrawer(drawerList);
+                }
         }
         return super.onOptionsItemSelected(item);
     }
