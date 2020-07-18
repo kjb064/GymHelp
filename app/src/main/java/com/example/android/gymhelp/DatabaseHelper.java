@@ -16,7 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // TODO: Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
 
     private static final String DATABASE_NAME = "GymHelper.db";
-    private static final String TABLE_NAME = "defaultWorkout";
+    private static String TABLE_NAME = "[Reddit PPL]";
     private static final String ID = "ID";
     private static final String EXERCISE_NAME = "name";
     private static final String WEIGHT = "weight";
@@ -28,7 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
 
     DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 27);     // Most recent version: 27
+        super(context, DATABASE_NAME, null, 28);     // Most recent version: 28
     }
 
     @Override
@@ -71,6 +71,57 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //        db.execSQL("DROP TABLE " + TABLE_NAME);
 //        db.execSQL("ALTER TABLE tempTable RENAME TO " + TABLE_NAME);
 //        db.execSQL("UPDATE " + TABLE_NAME + " SET " + INCREASE_WEIGHT_FLAG + " = 0");
+    }
+
+    ArrayList<String> getTableNames() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+        ArrayList<String> tableNames = new ArrayList<>();
+        if (c.moveToFirst()) {
+            while ( !c.isAfterLast() ) {
+                String name = c.getString( c.getColumnIndex("name"));
+                if (!name.contentEquals("android_metadata") && !name.contentEquals("sqlite_sequence")) {
+                    tableNames.add(name);
+                }
+                c.moveToNext();
+            }
+        }
+        return tableNames;
+    }
+
+    String getCurrentTableName() {
+        String name = TABLE_NAME;
+        return name.replaceAll("\\[", "").replaceAll("\\]", "");
+    }
+
+    boolean setCurrentTableName(String tableName) {
+        // Confirm table referenced by tableName exists and is not the current table.
+        boolean changeTableName = getTableNames().contains(tableName) && !TABLE_NAME.contentEquals(tableName);
+        if (changeTableName) {
+            TABLE_NAME = "[" + tableName + "]";
+        }
+        return changeTableName;
+    }
+
+    void addTable(String tableName) {
+        // TODO Validate/sanitize tableName
+        SQLiteDatabase db = getWritableDatabase();
+        // TODO determine how to share string so all tables' columns match should change occur (method w/ table name param)
+
+        db.execSQL( "CREATE TABLE " + tableName
+                + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + EXERCISE_NAME + " TEXT, "
+                + WEIGHT + " FLOAT, "
+                + SETS_REPS + " TEXT, "
+                + DATE + " TEXT, "
+                + IMAGE_PATH + " TEXT, "
+                + EXERCISE_TARGET + " INTEGER, "
+                + INCREASE_WEIGHT_FLAG + " INTEGER" + ")" );
+    }
+
+    void deleteTable(String table) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DROP TABLE " + table);
     }
 
     /*
