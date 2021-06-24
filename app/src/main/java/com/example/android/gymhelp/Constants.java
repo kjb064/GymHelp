@@ -13,10 +13,12 @@ public class Constants {
 
     public static final int NUM_TARGETS = 7;
     public static final String NO_IMAGE_PROVIDED = "NONE";
-    public static final String NO_FRAGMENT_ID = "NO_ID";
     public static final String DEFAULT_DATE = "--";
 
+    /** ID of the "Read Full" item in the context menu. */
     public static final int READ_FULL_ID = Menu.FIRST;
+    /** ID of the "Delete" item in the context menu. */
     public static final int DELETE_ID = Menu.FIRST + 1;
+    /** ID of the "Edit" item in the context menu. */
     public static final int EDIT_ID = Menu.FIRST + 2;
 }

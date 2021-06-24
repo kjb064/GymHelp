@@ -1,14 +1,17 @@
 package com.example.android.gymhelp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
+// TODO add class javadoc
 public class TargetAdapter extends FragmentStatePagerAdapter {
     /** Context of the app */
-    private Context mContext;
+    private final Context mContext;
 
     /**
      * Create a new {@link TargetAdapter} object.
@@ -24,46 +27,16 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
 
     /**
      * Return the {@link Fragment} that should be displayed for the given page number.
+     *
+     * @param position the position of the item
      */
     @Override
     public Fragment getItem(int position) {
-        MainActivity activity = (MainActivity) mContext;
-
-        if (position == Constants.CHEST) {
-            TargetFragment fragment = TargetFragment.createInstance(Constants.CHEST);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.CHEST));
-            return fragment;
-        } else if (position == Constants.LEGS) {
-            TargetFragment fragment = TargetFragment.createInstance(Constants.LEGS);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.LEGS));
-            return fragment;
-        } else if (position == Constants.BACK) {
-            TargetFragment fragment = TargetFragment.createInstance(Constants.BACK);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.BACK));
-            return fragment;
-        } else if (position == Constants.SHOULDERS) {
-            TargetFragment fragment = TargetFragment.createInstance(Constants.SHOULDERS);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.SHOULDERS));
-            return fragment;
-        } else if (position == Constants.ARMS){
-            TargetFragment fragment = TargetFragment.createInstance(Constants.ARMS);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.ARMS));
-            return fragment;
-        } else if (position == Constants.ABS){
-            TargetFragment fragment = TargetFragment.createInstance(Constants.ABS);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.ABS));
-            return fragment;
-        }
-        else {
-            TargetFragment fragment = TargetFragment.createInstance(Constants.COMPOUND);
-            activity.getSupportFragmentManager().beginTransaction().add(fragment, Integer.toString(Constants.COMPOUND));
-            return fragment;
-        }
-
+        return TargetFragment.createInstance(position);
     }
 
     /**
-     * Return the total number of pages.
+     * Return the total number of pages (num pages == num targets).
      */
     @Override
     public int getCount() {
@@ -72,19 +45,35 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        if (position == Constants.CHEST) {
-            return mContext.getString(R.string.target_chest);
-        } else if (position == Constants.LEGS) {
-            return mContext.getString(R.string.target_legs);
-        } else if (position == Constants.BACK) {
-            return mContext.getString(R.string.target_back);
-        } else if (position == Constants.SHOULDERS) {
-            return mContext.getString(R.string.target_shoulders);
-        } else if (position == Constants.ARMS){
-            return mContext.getString(R.string.target_arms);
-        } else if (position == Constants.ABS){
-            return mContext.getString(R.string.target_abs);
+        String title;
+        switch (position) {
+            case Constants.CHEST:
+                title = mContext.getString(R.string.target_chest);
+                break;
+            case Constants.LEGS:
+                title = mContext.getString(R.string.target_legs);
+                break;
+            case Constants.BACK:
+                title = mContext.getString(R.string.target_back);
+                break;
+            case Constants.SHOULDERS:
+                title = mContext.getString(R.string.target_shoulders);
+                break;
+            case Constants.ARMS:
+                title = mContext.getString(R.string.target_arms);
+                break;
+            case Constants.ABS:
+                title = mContext.getString(R.string.target_abs);
+                break;
+            case Constants.COMPOUND:
+                title = mContext.getString(R.string.target_compound);
+                break;
+            default:
+                title = "";
+                Log.e("getItem()", "Value of 'position' did not match a valid " +
+                        "value; returning empty string.");
+                break;
         }
-        else { return mContext.getString(R.string.target_compound);}
+        return title;
     }
 }

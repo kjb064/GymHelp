@@ -56,7 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     *  Used by the SearchResultsActivity to load the appropriate exercises based on the given
     *  query.
      */
-    public ArrayList getQueryResults(String query){
+    public ArrayList<Exercise> getQueryResults(String query){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME +
@@ -92,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Given the ID of the desired target (e.g. Chest, Arms, Abs, etc.), returns an ArrayList of all the
      * exercises in the table associated with that ID.
      */
-    public ArrayList getSelectedExercises(int targetID){
+    public ArrayList<Exercise> getSelectedExercises(int targetID){
         ArrayList<Exercise> exercises = new ArrayList<Exercise>();
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + TABLE_NAME;

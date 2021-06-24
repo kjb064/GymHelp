@@ -9,4 +9,6 @@
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView"/>
 
+    <!-- TODO Add 3 dots menu with sorting options -->
+
 </menu>

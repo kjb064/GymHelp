@@ -1,28 +1,28 @@
 package com.example.android.gymhelp;
 
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.util.ArrayList;
 
 public class SearchResultsActivity extends BaseActivity {
+
+    // TODO consider deleting this class and just use search feature as a filter if possible?
 
     private ExerciseAdapter adapter;
     private ListView listView;
@@ -49,27 +49,29 @@ public class SearchResultsActivity extends BaseActivity {
             exercises = db.getQueryResults(query);
 
             // Link adapter to ListView if results were found. Otherwise, notify if no results were found.
-            if(exercises.size() > 0){
+            if (!exercises.isEmpty()) {
                 adapter = new ExerciseAdapter(this, exercises, R.color.title_color);
 
                 registerForContextMenu(listView);
 
                 listView.setAdapter(adapter);
-                listView.setOnItemClickListener(new ExerciseClickListener(listView, this, Constants.NO_FRAGMENT_ID));
-            }
-            else{
+                listView.setOnItemClickListener(new ExerciseClickListener(this) {
+                    @Override
+                    protected void refresh() {
+                        refreshSearchResults();
+                    }
+                });
+            } else {
                 Toast.makeText(getApplicationContext(), "No results for query '" + query + "'.", Toast.LENGTH_SHORT).show();
             }
-
         }
-    } // end onCreate
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Finish (close) this activity once the back button (arrow) is selected from the ActionBar
         finish();
         return super.onOptionsItemSelected(item);
-
     }
 
     @Override
@@ -86,7 +88,7 @@ public class SearchResultsActivity extends BaseActivity {
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         final Exercise exercise = exercises.get((int) info.id);     // get the exercise selected
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case Constants.READ_FULL_ID: {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(exercise.getExerciseName());
@@ -107,12 +109,7 @@ public class SearchResultsActivity extends BaseActivity {
                 text = fullDate.getText() + exercise.getDate();
                 fullDate.setText(text);
 
-                builder.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                builder.setPositiveButton("Dismiss", (dialog, which) -> dialog.dismiss());
 
                 builder.show();
                 return true;
@@ -127,25 +124,20 @@ public class SearchResultsActivity extends BaseActivity {
                 builder.setView(dialogLayout);
 
                 checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
-                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if(!isChecked){
-                            db.deleteExerciseImage(exercise);
-                            exercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
-                            currentPhotoPath = "";
-                            checkBox.setClickable(false);
-                            checkBox.setText(R.string.no_photo_selected);
-                        }
-                        else {
-                            checkBox.setClickable(true);
-                            checkBox.setText(R.string.photo_selected);
-                        }
-
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (!isChecked) {
+                        db.deleteExerciseImage(exercise);
+                        exercise.setImageResourcePath(Constants.NO_IMAGE_PROVIDED);
+                        currentPhotoPath = "";
+                        checkBox.setClickable(false);
+                        checkBox.setText(R.string.no_photo_selected);
+                    } else {
+                        checkBox.setClickable(true);
+                        checkBox.setText(R.string.photo_selected);
                     }
                 });
 
-                if(exercise.hasImagePath()){
+                if (exercise.hasImagePath()) {
                     checkBox.setChecked(true);
                 }
 
@@ -154,44 +146,35 @@ public class SearchResultsActivity extends BaseActivity {
                 final EditText setsRepsEditText = (EditText) dialogLayout.findViewById(R.id.sets_reps_edit_text);
                 setsRepsEditText.setText(exercise.getSetsAndReps());
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Make sure fields are not blank
-                        if (nameEditText.getText().toString().trim().length() == 0
-                                || setsRepsEditText.getText().toString().trim().length() == 0) {
-                            Toast.makeText(getApplicationContext(), "Empty texts fields are not allowed.",
-                                    Toast.LENGTH_SHORT).show();
+                builder.setPositiveButton("OK", (dialog, which) -> {
+                    // Make sure fields are not blank
+                    if (nameEditText.getText().toString().trim().length() == 0
+                            || setsRepsEditText.getText().toString().trim().length() == 0) {
+                        Toast.makeText(getApplicationContext(), "Empty texts fields are not allowed.",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Exercise newExercise = new Exercise(nameEditText.getText().toString(),
+                                setsRepsEditText.getText().toString(),
+                                exercise.getExerciseTarget());
+                        newExercise.setExerciseID(exercise.getExerciseID());
+
+                        // If a new photo has been selected/taken, update the path too.
+                        if (!currentPhotoPath.isEmpty()) {
+                            newExercise.setImageResourcePath(currentPhotoPath);
+                            currentPhotoPath = "";
                         } else {
-                            Exercise newExercise = new Exercise(nameEditText.getText().toString(),
-                                    setsRepsEditText.getText().toString(),
-                                    exercise.getExerciseTarget());
-                            newExercise.setExerciseID(exercise.getExerciseID());
-
-                            // If a new photo has been selected/taken, update the path too.
-                            if (!currentPhotoPath.isEmpty()) {
-                                newExercise.setImageResourcePath(currentPhotoPath);
-                                currentPhotoPath = "";
-                            } else {
-                                // Otherwise, leave the path the same.
-                                newExercise.setImageResourcePath(exercise.getImageResourcePath());
-                            }
-
-                            db.updateExercise(newExercise);
-
-                            // "Refresh" the Activity once the exercise has been updated
-                            refreshSearchResults();
+                            // Otherwise, leave the path the same.
+                            newExercise.setImageResourcePath(exercise.getImageResourcePath());
                         }
 
+                        db.updateExercise(newExercise);
+
+                        // "Refresh" the Activity once the exercise has been updated
+                        refreshSearchResults();
                     }
                 });
 
-                builder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                builder.setNegativeButton("Dismiss", (dialog, which) -> dialog.dismiss());
 
                 builder.show();
                 return true;
@@ -201,26 +184,18 @@ public class SearchResultsActivity extends BaseActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Are you sure you would like to delete " + exercise.getExerciseName() + "?");
 
-                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        int id = exercise.getExerciseID();
-                        db.deleteExercise(id);
+                builder.setPositiveButton("Delete", (dialog, which) -> {
+                    int id = exercise.getExerciseID();
+                    db.deleteExercise(id);
 
-                        Toast.makeText(getApplicationContext(),
-                                "DELETED " + exercise.getExerciseName(),
-                                Toast.LENGTH_SHORT).show();
-                        exercises.remove((int) info.id);
-                        refreshSearchResults();
-                    }
+                    Toast.makeText(getApplicationContext(),
+                            "DELETED " + exercise.getExerciseName(),
+                            Toast.LENGTH_SHORT).show();
+                    exercises.remove((int) info.id);
+                    refreshSearchResults();
                 });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
                 builder.show();
                 return true;
@@ -228,37 +203,36 @@ public class SearchResultsActivity extends BaseActivity {
             default:
                 return super.onContextItemSelected(item);
         }
-    } // end onContextItemSelected
+    }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
-            if(dialogLayout != null) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            if (dialogLayout != null) {
                 checkBox.setChecked(true);
             }
-        }
-        // TODO: Verify the selected file is a valid type?
-        else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
+        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+            // TODO: Verify the selected file is a valid type?
             /*The result returns the Uri ("address") of the selected picture. */
             Uri imageUri = data.getData();
             currentPhotoPath = getPath(imageUri);
 
-            if(dialogLayout != null) {
+            if (dialogLayout != null) {
                 checkBox.setChecked(true);
             }
         }
-    } // end onActivityResult
+    }
 
-    /*
-    * Called when the ListView of this Activity needs to be updated to reflect a change in the data
-    * displayed.
+    /**
+     * Called when the ListView of this Activity needs to be updated to reflect a change in the data
+     * displayed.
      */
-    public void refreshSearchResults(){
+    public void refreshSearchResults() {
         exercises = db.getQueryResults(query);
         adapter.clear();
         adapter.addAll(exercises);
         adapter.notifyDataSetChanged();
         listView.invalidate();
-    } // end refreshSearchResults
+    }
 }

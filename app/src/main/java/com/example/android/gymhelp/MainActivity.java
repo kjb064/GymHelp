@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -15,8 +13,7 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+
 import java.io.File;
 
 public class MainActivity extends BaseActivity {
@@ -32,7 +29,7 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         // Find the view pager that will allow the user to swipe between fragments
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager = findViewById(R.id.viewpager);
 
         // Create an adapter that knows which fragment should be shown on each page
         adapter = new TargetAdapter(this, getSupportFragmentManager());
@@ -41,7 +38,7 @@ public class MainActivity extends BaseActivity {
         viewPager.setAdapter(adapter);
 
         // Find the tab layout that shows the tabs
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout = findViewById(R.id.tabs);
 
         // Connect the tab layout with the view pager. This will
         //   1. Update the tab layout when the view pager is swiped
@@ -49,8 +46,7 @@ public class MainActivity extends BaseActivity {
         //   3. Set the tab layout's tab names with the view pager's adapter's titles
         //      by calling onPageTitle()
         tabLayout.setupWithViewPager(viewPager);
-
-    } // end onCreate
+    }
 
     @Override
     protected void onRestart() {
@@ -58,14 +54,15 @@ public class MainActivity extends BaseActivity {
         refreshMainActivity();
     }
 
-    /*
+    /**
      * Resets the data contained within the current TargetFragment (i.e. the one currently visible in the
      * Main Activity). This method is called after the Main Activity is restarted, which is required to
      * reflect any changes made to the data from the SearchResultsActivity.
      */
-    private void refreshMainActivity(){
-        TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
-                .findFragmentByTag(Integer.toString(tabLayout.getSelectedTabPosition()));
+    private void refreshMainActivity() {
+        // TODO determine if below is correct way to get the current fragment.
+        // TODO replace all calls to findFragmentByID with this method if it's valid (BaseActivity, SearchResultsActivity)
+        TargetFragment targetFragment = (TargetFragment) adapter.getItem(viewPager.getCurrentItem());
         targetFragment.resetFragmentData();
     }
 
@@ -84,8 +81,8 @@ public class MainActivity extends BaseActivity {
         final CursorAdapter suggestionsAdapter = new SimpleCursorAdapter(getApplicationContext(),
                 R.layout.hint_row,
                 null,
-                new String[]{"name"},
-                new int[]{R.id.row_text_view},
+                new String[] {"name"},
+                new int[] {R.id.row_text_view},
                 0);
 
         searchView.setSuggestionsAdapter(suggestionsAdapter);
@@ -110,108 +107,125 @@ public class MainActivity extends BaseActivity {
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(final String newText) {
                 // Avoid searching for exact query twice (specifically, the below if statement
                 // prevents the issue of submitting the query twice when a keyboard autocomplete suggestion
                 // is selected while input is being provided to the SearchView.
-                if(!searchText.equals(newText.trim()) && !newText.isEmpty()) {
-                    newText = newText.trim();   // Remove leading/trailing whitespace
-                    searchText = newText;
-                    Cursor c = myDb.getQuerySuggestions(newText);
+                final String newQuery = newText.trim(); // Remove leading/trailing whitespace
+                if (!searchText.equals(newQuery) && !newQuery.isEmpty()) {
+                    searchText = newQuery;
+                    Cursor c = myDb.getQuerySuggestions(newQuery);
 
                     if (c.getCount() > 0) {
                         suggestionsAdapter.swapCursor(c);
                         suggestionsAdapter.notifyDataSetChanged();
                         return true;
-                    } else {
-                        return false;
                     }
                 }
-                else{
-                    return false;
-                }
+                return false;
             }
         });
         return true;
-    } // end onCreateOptionsMenu
+    }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         int tabPosition = tabLayout.getSelectedTabPosition();
+        TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
+                .findFragmentByTag(Integer.toString(tabPosition));
 
-        // Below is for a picture being successfully taken by the camera on the device.
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
-            if(dialogLayout != null) {
-                checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+        switch (requestCode) {
+            case REQUEST_IMAGE_CAPTURE:
+                handleImageCapture(resultCode, targetFragment);
+                break;
+            case PICK_IMAGE:
+                handlePickImage(resultCode, targetFragment, data);
+                break;
+            default:
+                Log.e("onActivityResult()", "Value of 'requestCode' did not " +
+                        "match a valid value");
+                break;
+        }
+    }
+
+    /**
+     * Handles the case where the user has just successfully taken a picture using the camera
+     * on their device.
+     *
+     * @param resultCode the result code
+     * @param targetFragment the currently active TargetFragment
+     */
+    private void handleImageCapture(int resultCode, TargetFragment targetFragment) {
+        if (resultCode == RESULT_OK) {
+            if (dialogLayout != null) {
+                checkBox = dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setClickable(true);
                 checkBox.setText(R.string.photo_selected);
                 checkBox.setChecked(true);
-                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!isChecked) {
-                            if (!currentPhotoPath.isEmpty()) {
-                                File deleteFile = new File(currentPhotoPath);
-                                if (deleteFile.delete()) {
-                                    Log.d("MA: Delete", "Successfully deleted file at " + currentPhotoPath);
-                                } else {
-                                    Log.d("MA: Delete", "Could not delete file at " + currentPhotoPath);
-                                }
-
-                                currentPhotoPath = "";
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (!isChecked) {
+                        if (!currentPhotoPath.isEmpty()) {
+                            File deleteFile = new File(currentPhotoPath);
+                            if (deleteFile.delete()) {
+                                Log.d("Image deletion", "Successfully deleted file at " + currentPhotoPath);
+                            } else {
+                                Log.e("Image deletion", "Could not delete file at " + currentPhotoPath);
                             }
-                            checkBox.setClickable(false);
-                            checkBox.setText(R.string.no_photo_selected);
+                            currentPhotoPath = "";
                         }
+                        checkBox.setClickable(false);
+                        checkBox.setText(R.string.no_photo_selected);
                     }
                 });
             }
 
-            TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
-                    .findFragmentByTag(Integer.toString(tabPosition));
-
-            if(targetFragment != null && targetFragment.isVisible()){
-                if(targetFragment.checkBox != null){
-                    targetFragment.checkBox.setChecked(true);
-                }
+            if (targetFragment != null && targetFragment.isVisible()
+                    && targetFragment.checkBox != null) {
+                targetFragment.checkBox.setChecked(true);
             }
+        } else if (resultCode == RESULT_CANCELED) {
+            Log.d("handleImageCapture()", "The user cancelled or an error occurred.");
         }
+    }
+
+    /**
+     * Handles the case where the user has just selected an image file that was saved on their
+     * device.
+     *
+     * @param resultCode the result code
+     * @param targetFragment the currently active TargetFragment
+     * @param data the result data
+     */
+    private void handlePickImage(int resultCode, TargetFragment targetFragment, Intent data) {
         // TODO: Verify the selected file is a valid type?
-        // Below is for a picture successfully being selected from the device's gallery.
-        else if(requestCode == PICK_IMAGE && resultCode == RESULT_OK){
+        if (resultCode == RESULT_OK) {
             /*The result returns the Uri ("address") of the selected picture. */
             Uri imageUri = data.getData();
             currentPhotoPath = getPath(imageUri);
-            if(dialogLayout != null) {
-                checkBox = (CheckBox) dialogLayout.findViewById(R.id.photo_check_box);
+            if (dialogLayout != null) {
+                checkBox = dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setClickable(true);
                 checkBox.setText(R.string.photo_selected);
                 checkBox.setChecked(true);
-                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!isChecked) {
-                            if (!currentPhotoPath.isEmpty()) {
-                                currentPhotoPath = "";
-                            }
-                            checkBox.setClickable(false);
-                            checkBox.setText(R.string.no_photo_selected);
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (!isChecked) {
+                        if (!currentPhotoPath.isEmpty()) {
+                            currentPhotoPath = "";
                         }
+                        checkBox.setClickable(false);
+                        checkBox.setText(R.string.no_photo_selected);
                     }
                 });
             }
 
-            TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
-                    .findFragmentByTag(Integer.toString(tabPosition));
-
-            if(targetFragment != null && targetFragment.isVisible()){
-                if(targetFragment.checkBox != null){
-                    targetFragment.checkBox.setChecked(true);
-                }
+            if (targetFragment != null && targetFragment.isVisible()
+                    && targetFragment.checkBox != null) {
+                targetFragment.checkBox.setChecked(true);
             }
+        } else if (resultCode == RESULT_CANCELED) {
+            Log.d("handlePickImage()", "The user cancelled or an error occurred.");
         }
-    } // end onActivityResult
+    }
 
 }
