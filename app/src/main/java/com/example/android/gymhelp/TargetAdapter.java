@@ -1,11 +1,9 @@
 package com.example.android.gymhelp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 // TODO add class javadoc
@@ -45,28 +43,32 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
+        return lookupTitle(position, mContext);
+    }
+
+    public static String lookupTitle(int targetId, Context context) {
         String title;
-        switch (position) {
+        switch (targetId) {
             case Constants.CHEST:
-                title = mContext.getString(R.string.target_chest);
+                title = context.getString(R.string.target_chest);
                 break;
             case Constants.LEGS:
-                title = mContext.getString(R.string.target_legs);
+                title = context.getString(R.string.target_legs);
                 break;
             case Constants.BACK:
-                title = mContext.getString(R.string.target_back);
+                title = context.getString(R.string.target_back);
                 break;
             case Constants.SHOULDERS:
-                title = mContext.getString(R.string.target_shoulders);
+                title = context.getString(R.string.target_shoulders);
                 break;
             case Constants.ARMS:
-                title = mContext.getString(R.string.target_arms);
+                title = context.getString(R.string.target_arms);
                 break;
             case Constants.ABS:
-                title = mContext.getString(R.string.target_abs);
+                title = context.getString(R.string.target_abs);
                 break;
             case Constants.COMPOUND:
-                title = mContext.getString(R.string.target_compound);
+                title = context.getString(R.string.target_compound);
                 break;
             default:
                 title = "";
