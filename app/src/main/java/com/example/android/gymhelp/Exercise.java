@@ -1,13 +1,16 @@
 package com.example.android.gymhelp;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Represents an Exercise stored in a table in the database.
  */
-public class Exercise {
+public class Exercise implements Parcelable {
 
     private int exerciseID;
-    private final String exerciseName;
-    private final String setsAndReps;
+    private String exerciseName;
+    private String setsAndReps;
     private String imageResourcePath = Constants.NO_IMAGE_PROVIDED;
     private final float recentWeight;
     private final int exerciseTarget;
@@ -51,6 +54,16 @@ public class Exercise {
         this.exerciseTarget = exerciseTarget;
     }
 
+    public Exercise(Parcel source) {
+        this.exerciseID = source.readInt();
+        this.exerciseName = source.readString();
+        this.setsAndReps = source.readString();
+        this.recentWeight = source.readFloat();
+        this.imageResourcePath = source.readString();
+        this.date = source.readString();
+        this.exerciseTarget = source.readInt();
+    }
+
     public int getExerciseID() {
         return this.exerciseID;
     }
@@ -63,9 +76,13 @@ public class Exercise {
         return exerciseName;
     }
 
+    public void setExerciseName(String name) { this.exerciseName = name; }
+
     public String getSetsAndReps() {
         return setsAndReps;
     }
+
+    public void setSetsAndReps(String setsReps) { this.setsAndReps = setsReps; }
 
     public float getRecentWeight() {
         return recentWeight;
@@ -93,4 +110,33 @@ public class Exercise {
     public String getImageResourcePath() {
         return this.imageResourcePath;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.exerciseID);
+        dest.writeString(this.exerciseName);
+        dest.writeString(this.setsAndReps);
+        dest.writeFloat(this.recentWeight);
+        dest.writeString(this.imageResourcePath);
+        dest.writeString(this.date);
+        dest.writeInt(this.exerciseTarget);
+    }
+
+    public static final Parcelable.Creator<Exercise> CREATOR = new Parcelable.Creator<Exercise>() {
+
+        @Override
+        public Exercise createFromParcel(Parcel source) {
+            return new Exercise(source);
+        }
+
+        @Override
+        public Exercise[] newArray(int size) {
+            return new Exercise[size];
+        }
+    };
 }

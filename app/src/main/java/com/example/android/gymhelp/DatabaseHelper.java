@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import java.io.File;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -206,13 +206,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 path = cursor.getString(0);
             }
 
-            if (path != null && !path.equals(Constants.NO_IMAGE_PROVIDED)) {
-                File deleteFile = new File(path);
-                if (deleteFile.delete()) {
-                    Log.d("Delete", "Successfully deleted file at " + path);
-                } else {
-                    Log.d("Delete", "Could not delete file at " + path);
-                }
+            if (FileUtil.deleteFile(path)) {
+                Log.d("Delete",
+                        "Successfully deleted file at " + path);
+            } else {
+                Log.d("Delete",
+                        "Could not delete file at " + path);
             }
 
             // Then delete the exercise from the table
@@ -228,29 +227,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Deletes images that were saved to the app's internal storage (i.e. taken
      * by the camera upon selecting the "Take Photo" button).
      *
-     * @param exercise the Exercise whose image should be deleted
+     * @param exerciseId the ID of the Exercise whose image should be deleted
+     * @param path the path to file to delete
      */
-    public void deleteExerciseImage(Exercise exercise) {
+    public void deleteExerciseImage(int exerciseId, String path) {
         // TODO call this method within deleteExercise() above?
 
         // Delete the image if possible
-        String path = exercise.getImageResourcePath();
-        if (path != null && !path.equals(Constants.NO_IMAGE_PROVIDED)) {
-            File deleteFile = new File(path);
-            if (deleteFile.delete()) {
-                Log.d("Delete",
-                        "Successfully deleted file at " + exercise.getImageResourcePath());
-            } else {
-                Log.d("Delete",
-                        "Could not delete file at " + exercise.getImageResourcePath());
-            }
+        if (FileUtil.deleteFile(path)) {
+            Log.d("Delete",
+                "Successfully deleted file at " + path);
+        } else {
+            Log.d("Delete",
+                "Could not delete file at " + path);
         }
 
         // Delete the path from the table
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues args = new ContentValues();
         args.putNull(IMAGE_PATH);
-        db.update(TABLE_NAME, args, ID + " = " + exercise.getExerciseID(), null);
+        db.update(TABLE_NAME, args, ID + " = " + exerciseId, null);
     }
 
     /**
