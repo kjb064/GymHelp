@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import static com.example.android.gymhelp.Constants.DELETE_ID;
 import static com.example.android.gymhelp.Constants.EDIT_ID;
 import static com.example.android.gymhelp.Constants.READ_FULL_ID;
+import static com.example.android.gymhelp.Constants.WEIGHT_FLAG_ID;
 
 /**
  * Displays a ListView containing all exercises associated with a target group.
@@ -163,6 +164,7 @@ public class TargetFragment extends Fragment {
         menu.add(groupID, READ_FULL_ID, 0, R.string.menu_read_full);
         menu.add(groupID, EDIT_ID, 0, R.string.menu_edit);
         menu.add(groupID, DELETE_ID, 0, R.string.menu_delete);
+        menu.add(groupID, WEIGHT_FLAG_ID, 0, R.string.menu_weight_flag);
     }
 
     @Override
@@ -187,6 +189,15 @@ public class TargetFragment extends Fragment {
                     }
                     case DELETE_ID: {
                         displayDeleteDialog(exercise, activity);
+                        return true;
+                    }
+                    case WEIGHT_FLAG_ID: {
+                        // TODO add exercise weight flag
+                        int currentFlag = exercise.getFlaggedForIncrease();
+                        int newFlag = currentFlag == 0 ? 1 : 0;
+                        exercise.setFlaggedForIncrease(newFlag);
+                        db.updateExerciseFlag(exercise);
+                        refreshFragment();
                         return true;
                     }
                     default:

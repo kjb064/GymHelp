@@ -84,6 +84,17 @@
                 android:layout_weight="1"
                 android:layout_gravity="center_vertical"/>
 
+            <TextView
+                android:id="@+id/increase_weight_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/increase_weight"
+                android:textColor="@android:color/holo_red_dark"
+                android:visibility="visible"
+                android:height="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"/>
+
         </LinearLayout>
 
 

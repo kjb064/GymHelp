@@ -21,4 +21,6 @@ public class Constants {
     public static final int DELETE_ID = Menu.FIRST + 1;
     /** ID of the "Edit" item in the context menu. */
     public static final int EDIT_ID = Menu.FIRST + 2;
+    /** ID of the "Set/Unset Weight Flag" item in the context menu. */
+    public static final int WEIGHT_FLAG_ID = Menu.FIRST + 3;
 }

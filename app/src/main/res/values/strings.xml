@@ -2,6 +2,7 @@
     <string name="app_name">GymHelp</string>
 
     <string name="weight_updated">Weight Updated: </string>
+    <string name="increase_weight">Increase Weight!</string>
 
     <string name="no_photo_selected">No photo selected</string>
     <string name="photo_selected">Uncheck to remove photo</string>
@@ -17,6 +18,7 @@
     <string name="menu_read_full">Read Full</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_edit">Edit</string>
+    <string name="menu_weight_flag">Set/Unset Weight Flag</string>
 
     <string name="search_hint">Search Exercises</string>
     <string name="add_exercise">Add Exercise</string>

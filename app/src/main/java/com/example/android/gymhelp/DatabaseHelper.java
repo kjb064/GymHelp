@@ -25,6 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATE = "date";
     private static final String IMAGE_PATH = "imagePath";
     private static final String EXERCISE_TARGET = "target";
+    private static final String WEIGHT_FLAG = "flag";
     private static final SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy", Locale.US);
 
     private static final int ID_INDEX = 0;
@@ -34,29 +35,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATE_INDEX = 4;
     private static final int IMAGE_PATH_INDEX = 5;
     private static final int TARGET_INDEX = 6;
+    private static final int WEIGHT_FLAG_INDEX = 7;
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 20);     // Most recent version: 20
+        super(context, DATABASE_NAME, null, 21);     // Most recent version: 21
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL( "CREATE TABLE " + TABLE_NAME
+        createExerciseTable(db, TABLE_NAME);
+
+        createDefaultPPLTable();
+    }
+
+    /**
+     * Creates a table with the given name in the database for holding data on different exercises.
+     *
+     * @param db the database manager
+     * @param tableName the name of the table to be created
+     */
+    private void createExerciseTable(SQLiteDatabase db, String tableName) {
+        db.execSQL("CREATE TABLE " + tableName
                 + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + EXERCISE_NAME + " TEXT, "
                 + WEIGHT + " FLOAT, "
                 + SETS_REPS + " TEXT, "
                 + DATE + " TEXT, "
                 + IMAGE_PATH + " TEXT, "
-                + EXERCISE_TARGET + " INTEGER" + ")" );
-
-        createDefaultPPLTable(db);
+                + EXERCISE_TARGET + " INTEGER, "
+                + WEIGHT_FLAG + " INTEGER)" );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
+        // TODO ensure this upgrades all tables once multiple tables feature is implemented
+
+        // Re-create the existing table as tempTable
+        final String tempTableName = "tempTable";
+        createExerciseTable(db, tempTableName);
+
+        db.execSQL("INSERT INTO " + tempTableName
+        + " ( " + ID + ", " + EXERCISE_NAME + ", " + WEIGHT + ", " + SETS_REPS + ", " + DATE +
+                ", " + IMAGE_PATH + ", " + EXERCISE_TARGET + ")"
+        + " SELECT " + ID + ", " + EXERCISE_NAME + ", " + WEIGHT + ", " +SETS_REPS + ", "
+                + DATE + ", " + IMAGE_PATH+ ", " + EXERCISE_TARGET + " FROM " + TABLE_NAME);
+
+        // Delete the old table and rename tempTable to the old table's name
+        db.execSQL("DROP TABLE " + TABLE_NAME);
+        db.execSQL("ALTER TABLE tempTable RENAME TO " + TABLE_NAME);
+        db.execSQL("UPDATE " + TABLE_NAME + " SET " + WEIGHT_FLAG + " = 0");
     }
 
     /**
@@ -98,8 +125,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String date = cursor.getString(DATE_INDEX);
         String imagePath = cursor.getString(IMAGE_PATH_INDEX);
         int targetID = cursor.getInt(TARGET_INDEX);
+        int weightFlag = cursor.getInt(WEIGHT_FLAG_INDEX);
 
-        return new Exercise(id, name, sets, weight, imagePath, date, targetID);
+        return new Exercise(id, name, sets, weight, imagePath, date, targetID, weightFlag);
     }
 
     /**
@@ -181,6 +209,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DATE, Constants.DEFAULT_DATE);
         values.put(IMAGE_PATH, newExercise.getImageResourcePath());
         values.put(EXERCISE_TARGET, newExercise.getExerciseTarget());
+        values.put(WEIGHT_FLAG, newExercise.getFlaggedForIncrease());
         db.insert(TABLE_NAME, null, values);
     }
 
@@ -308,12 +337,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Updates the given Exercise's weight flag in the table.
+     *
+     * @param exercise the Exercise to update
+     */
+    void updateExerciseFlag(Exercise exercise) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(WEIGHT_FLAG, exercise.getFlaggedForIncrease());
+        db.update(TABLE_NAME, contentValues, ID + " = ?", new String[] { Integer.toString(exercise.getExerciseID()) });
+    }
+
     /*
      * The PPL routine below was retrieved from:
      * https://www.reddit.com/r/Fitness/comments/37ylk5/a_linear_progression_based_ppl_program_for/
      */
-    private void createDefaultPPLTable(SQLiteDatabase db) {
-        ContentValues values = new ContentValues();
+    private void createDefaultPPLTable() {
         final ArrayList<Exercise> exercises = new ArrayList<>();
 
         /*
@@ -413,13 +453,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Constants.LEGS));
 
 
-        for (int i = 0; i < exercises.size(); i++) {
-            values.put(EXERCISE_NAME, exercises.get(i).getExerciseName());
-            values.put(WEIGHT, exercises.get(i).getRecentWeight());
-            values.put(SETS_REPS, exercises.get(i).getSetsAndReps());
-            values.put(DATE, Constants.DEFAULT_DATE);
-            values.put(EXERCISE_TARGET, exercises.get(i).getExerciseTarget());
-            db.insert(TABLE_NAME, null, values);
+        for (Exercise exercise : exercises) {
+            addExercise(exercise);
         }
     }
 
@@ -427,7 +462,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * The cutting routine below was retrieved from:
      * https://www.bodybuilding.com/content/ryan-hughes-cutting-program.html
      */
-    private void createDefaultCuttingTable(SQLiteDatabase db) {
+    private void createDefaultCuttingTable() {
         ContentValues values = new ContentValues();
         final ArrayList<Exercise> exercises = new ArrayList<>();
 
@@ -583,13 +618,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 0,
                 Constants.ARMS) );
 
-        for (int i = 0; i < exercises.size(); i++) {
-            values.put(EXERCISE_NAME, exercises.get(i).getExerciseName());
-            values.put(WEIGHT, exercises.get(i).getRecentWeight());
-            values.put(SETS_REPS, exercises.get(i).getSetsAndReps());
-            values.put(DATE, Constants.DEFAULT_DATE);
-            values.put(EXERCISE_TARGET, exercises.get(i).getExerciseTarget());
-            db.insert(TABLE_NAME, null, values);
+        for (Exercise exercise : exercises) {
+            addExercise(exercise);
         }
     }
 }

@@ -73,6 +73,10 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         String date = context.getResources().getString(R.string.weight_updated) + " " + currentExercise.getDate();
         dateTextView.setText(date);
 
+        TextView increaseWeightTextView = listItemView.findViewById(R.id.increase_weight_text_view);
+        int visibility = currentExercise.getFlaggedForIncrease() == 1 ? View.VISIBLE : View.INVISIBLE;
+        increaseWeightTextView.setVisibility(visibility);
+
         // Find the ImageView in the list_item.xml layout with the ID "image"
         ImageView iconView = listItemView.findViewById(R.id.image);
 

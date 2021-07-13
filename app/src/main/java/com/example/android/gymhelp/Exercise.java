@@ -15,6 +15,7 @@ public class Exercise implements Parcelable {
     private final float recentWeight;
     private final int exerciseTarget;
     private String date = Constants.DEFAULT_DATE;
+    private int flaggedForIncrease = 0;
 
     /**
      * Constructor for a new Exercise.
@@ -44,7 +45,7 @@ public class Exercise implements Parcelable {
      * @param exerciseTarget the target ID
      */
     public Exercise(int exerciseID, String exerciseName, String setsAndReps, float recentWeight,
-                    String imageResourcePath, String date, int exerciseTarget) {
+                    String imageResourcePath, String date, int exerciseTarget, int weightFlag) {
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
@@ -52,8 +53,14 @@ public class Exercise implements Parcelable {
         this.imageResourcePath = imageResourcePath;
         this.date = date;
         this.exerciseTarget = exerciseTarget;
+        this.flaggedForIncrease = weightFlag;
     }
 
+    /**
+     * Creates an Exercise from a Parcel.
+     *
+     * @param source the Parcel containing the data to initialize this Exercise
+     */
     public Exercise(Parcel source) {
         this.exerciseID = source.readInt();
         this.exerciseName = source.readString();
@@ -111,6 +118,15 @@ public class Exercise implements Parcelable {
         return this.imageResourcePath;
     }
 
+    void setFlaggedForIncrease(int flag) {
+        this.flaggedForIncrease = flag;
+    }
+
+    int getFlaggedForIncrease() {
+        return this.flaggedForIncrease;
+    }
+
+    // TODO determine what the return value should be
     @Override
     public int describeContents() {
         return 0;
