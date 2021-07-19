@@ -17,7 +17,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // TODO: Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
 
     private static final String DATABASE_NAME = "GymHelper.db";
-    private static final String TABLE_NAME = "defaultWorkout";
     private static final String ID = "ID";
     private static final String EXERCISE_NAME = "name";
     private static final String WEIGHT = "weight";
@@ -37,8 +36,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int TARGET_INDEX = 6;
     private static final int WEIGHT_FLAG_INDEX = 7;
 
+    /**
+     * The table being operated on by this DatabaseHelper.
+     *
+     * TODO consider making non-static; Currently is static so that changing the table being operated
+     * on via setCurrentTableName() syncs with each TargetFragment's instance of DatabaseHelper.
+     *
+     * Alternatively, fragments could delegate to MainActivity to handle all database operations?
+     */
+    private static String TABLE_NAME = "defaultWorkout";
+
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 21);     // Most recent version: 21
+        super(context, DATABASE_NAME, null, 22);     // Most recent version: 22
     }
 
     @Override
@@ -49,13 +58,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Surrounds the given text with quotes (") and returns the new String.
+     *
+     * <p>
+     * Convenience to surround a table's name with quotes for SQLite to accept a name that may
+     * include spaces.
+     * </p>
+     *
+     * @param text the text to surround with quotes
+     * @return the text surrounded by quotes
+     */
+    private String quotes(String text) {
+        return "\"" + text + "\"";
+    }
+
+    /**
      * Creates a table with the given name in the database for holding data on different exercises.
      *
      * @param db the database manager
-     * @param tableName the name of the table to be created
+     * @param tableName the name of the table to be created (name does not need to include quotes)
      */
     private void createExerciseTable(SQLiteDatabase db, String tableName) {
-        db.execSQL("CREATE TABLE " + tableName
+        // Surround the tableName in quotes to allow for names with spaces.
+        db.execSQL("CREATE TABLE " + quotes(tableName)
                 + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + EXERCISE_NAME + " TEXT, "
                 + WEIGHT + " FLOAT, "
@@ -78,12 +103,88 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         + " ( " + ID + ", " + EXERCISE_NAME + ", " + WEIGHT + ", " + SETS_REPS + ", " + DATE +
                 ", " + IMAGE_PATH + ", " + EXERCISE_TARGET + ")"
         + " SELECT " + ID + ", " + EXERCISE_NAME + ", " + WEIGHT + ", " +SETS_REPS + ", "
-                + DATE + ", " + IMAGE_PATH+ ", " + EXERCISE_TARGET + " FROM " + TABLE_NAME);
+                + DATE + ", " + IMAGE_PATH+ ", " + EXERCISE_TARGET + " FROM " + internalGetCurrentTable());
 
         // Delete the old table and rename tempTable to the old table's name
-        db.execSQL("DROP TABLE " + TABLE_NAME);
-        db.execSQL("ALTER TABLE tempTable RENAME TO " + TABLE_NAME);
-        db.execSQL("UPDATE " + TABLE_NAME + " SET " + WEIGHT_FLAG + " = 0");
+        final String tableNameWithQuotes = internalGetCurrentTable();
+        db.execSQL("DROP TABLE " + tableNameWithQuotes);
+        db.execSQL("ALTER TABLE tempTable RENAME TO " + tableNameWithQuotes);
+        db.execSQL("UPDATE " + tableNameWithQuotes + " SET " + WEIGHT_FLAG + " = 0");
+    }
+
+    /**
+     * Gets a list of all tables currently in the database.
+     *
+     * @return the list of tables
+     */
+    ArrayList<String> getTableNames() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<String> tableNames = new ArrayList<>();
+
+        try (Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null)) {
+            if (c.moveToFirst()) {
+                while (!c.isAfterLast()) {
+                    String name = c.getString(c.getColumnIndex("name"));
+                    if (!name.contentEquals("android_metadata") && !name.contentEquals("sqlite_sequence")) {
+                        tableNames.add(name);
+                    }
+                    c.moveToNext();
+                }
+            }
+        }
+        return tableNames;
+    }
+
+    /**
+     * @return the name of the current table being operated on
+     */
+    String getCurrentTableName() {
+        return TABLE_NAME;
+    }
+
+    /**
+     * Sets the given tableName as the current table to operate on.
+     *
+     * @param tableName the table to set
+     */
+    void setCurrentTableName(String tableName) {
+        TABLE_NAME = tableName;
+    }
+
+    /**
+     * Checks whether a table with the given name exists in the database.
+     *
+     * @param tableName the name of the table whose existence to verify
+     * @return whether the table exists
+     */
+    boolean doesTableExist(String tableName) {
+        return getTableNames().contains(tableName);
+    }
+
+    /**
+     * Creates a table in the database with the given name.
+     *
+     * @param tableName the name of the table to create
+     */
+    void addTable(String tableName) {
+        // TODO Validate/sanitize tableName
+        SQLiteDatabase db = getWritableDatabase();
+        createExerciseTable(db, tableName);
+    }
+
+    /**
+     * Deletes the table in the database with the given name.
+     *
+     * @param tableName the name of the table to delete
+     */
+    void deleteTable(String tableName) {
+        // TODO confirm table exists in database before attempting to delete OR catch exception
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DROP TABLE " + quotes(tableName));
+    }
+
+    private String internalGetCurrentTable() {
+        return quotes(getCurrentTableName());
     }
 
     /**
@@ -113,7 +214,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public Cursor getQuerySuggestions(String searchText) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT rowid _id, " + EXERCISE_NAME + " FROM " + TABLE_NAME +
+        return db.rawQuery("SELECT rowid _id, " + EXERCISE_NAME + " FROM " + internalGetCurrentTable() +
                 " WHERE " + EXERCISE_NAME + " LIKE '%" + searchText + "%';", null);
     }
 
@@ -141,7 +242,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ArrayList<Exercise> exercises = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String sql = "SELECT * FROM " + TABLE_NAME;
+        String sql = "SELECT * FROM " + internalGetCurrentTable();
         if (isValidTargetID(targetID)) {
             // Lookup all exercises with the given target ID
             sql += " WHERE " + EXERCISE_TARGET + " = " + targetID;
@@ -188,7 +289,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Calendar calendar = Calendar.getInstance();
         String currentDate = formatter.format(calendar.getTime());
 
-        String sql = "UPDATE " + TABLE_NAME +
+        String sql = "UPDATE " + internalGetCurrentTable() +
                 " SET " + WEIGHT + " = " + weight + ", " +
                 DATE + " = '" + currentDate + "'" +
                 " WHERE ID = " + exerciseID + ";";
@@ -210,7 +311,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(IMAGE_PATH, newExercise.getImageResourcePath());
         values.put(EXERCISE_TARGET, newExercise.getExerciseTarget());
         values.put(WEIGHT_FLAG, newExercise.getFlaggedForIncrease());
-        db.insert(TABLE_NAME, null, values);
+        db.insert(internalGetCurrentTable(), null, values);
     }
 
     /**
@@ -227,7 +328,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String path = null;
         SQLiteDatabase db = this.getWritableDatabase();
-        final String query = "SELECT " + IMAGE_PATH + " FROM " + TABLE_NAME +
+        final String query = "SELECT " + IMAGE_PATH + " FROM " + internalGetCurrentTable() +
                 " WHERE " + ID + " = " + exerciseID + ";";
 
         try (Cursor cursor = db.rawQuery(query, null)) {
@@ -244,7 +345,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
             // Then delete the exercise from the table
-            if (db.delete(TABLE_NAME, ID + "=" + exerciseID, null) > 0) {
+            if (db.delete(internalGetCurrentTable(), ID + "=" + exerciseID, null) > 0) {
                 Log.d("Delete", "Successfully deleted exercise #" + exerciseID);
             } else {
                 Log.d("Delete", "Could not delete exercise #" + exerciseID);
@@ -275,7 +376,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues args = new ContentValues();
         args.putNull(IMAGE_PATH);
-        db.update(TABLE_NAME, args, ID + " = " + exerciseId, null);
+        db.update(internalGetCurrentTable(), args, ID + " = " + exerciseId, null);
     }
 
     /**
@@ -285,7 +386,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public void updateExercise(Exercise exercise) {
         SQLiteDatabase db = this.getWritableDatabase();
-        final String query = "SELECT * FROM " + TABLE_NAME +
+        final String query = "SELECT * FROM " + internalGetCurrentTable() +
                 " WHERE " + ID + " = " + exercise.getExerciseID() + ";";
         try (Cursor cursor = db.rawQuery(query, null)) {
             if (cursor.moveToFirst()) {
@@ -293,7 +394,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String setsAndReps = cursor.getString(3);
                 String imagePath = cursor.getString(5);
 
-                String sql = "UPDATE " + TABLE_NAME + " SET ";
+                String sql = "UPDATE " + internalGetCurrentTable() + " SET ";
                 boolean updateNeeded = false;
 
                 if (!name.equals(exercise.getExerciseName())) {
@@ -346,7 +447,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(WEIGHT_FLAG, exercise.getFlaggedForIncrease());
-        db.update(TABLE_NAME, contentValues, ID + " = ?", new String[] { Integer.toString(exercise.getExerciseID()) });
+        db.update(internalGetCurrentTable(), contentValues, ID + " = ?", new String[] { Integer.toString(exercise.getExerciseID()) });
     }
 
     /*

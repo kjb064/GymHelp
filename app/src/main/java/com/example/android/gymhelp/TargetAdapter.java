@@ -1,6 +1,7 @@
 package com.example.android.gymhelp;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -31,6 +32,12 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
     @Override
     public Fragment getItem(int position) {
         return TargetFragment.createInstance(position);
+    }
+
+    @Override
+    public int getItemPosition(@NonNull Object object) {
+        // Force the fragments to be reloaded upon a call to notifyDataSetChanged()
+        return POSITION_NONE;
     }
 
     /**

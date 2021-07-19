@@ -34,7 +34,7 @@ public class BaseActivity extends AppCompatActivity {
     // TODO determine if this class is still needed for anything
     protected DatabaseHelper myDb;
     protected TabLayout tabLayout;
-    protected TargetAdapter adapter;
+    protected TargetAdapter targetAdapter;
     protected ViewPager viewPager;
     /** TODO make private or protected */
     //public static String currentPhotoPath = "";    // name of file saved by camera
