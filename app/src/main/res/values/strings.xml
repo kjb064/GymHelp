@@ -28,4 +28,7 @@
 
     <string name="new_program_prompt">Provide name for new Program:</string>
     <string name="add_new_program_label">Add new Program</string>
+    <string name="sort_ascending_title">Sort A to Z</string>
+    <string name="sort_descending_title">Sort Z to A</string>
+    <string name="sort_unsorted_title">Unsorted</string>
 </resources>

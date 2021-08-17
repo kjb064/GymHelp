@@ -31,7 +31,7 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
      */
     @Override
     public Fragment getItem(int position) {
-        return TargetFragment.createInstance(position);
+        return TargetFragment.createInstance(position, ((MainActivity) mContext).getSelectedSortType());
     }
 
     @Override
@@ -79,7 +79,7 @@ public class TargetAdapter extends FragmentStatePagerAdapter {
                 break;
             default:
                 title = "";
-                Log.e("getItem()", "Value of 'position' did not match a valid " +
+                Log.e("getItem()", "Value of 'targetId' did not match a valid " +
                         "value; returning empty string.");
                 break;
         }

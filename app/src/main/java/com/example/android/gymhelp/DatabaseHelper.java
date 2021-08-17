@@ -14,6 +14,9 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+    // TODO refactor to use SQLiteDatabase methods where applicable
+    // TODO refactor to call getWriteable()/getReadableDatabase() within try with resource blocks
+
     // TODO: Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
 
     private static final String DATABASE_NAME = "GymHelper.db";
@@ -43,6 +46,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * on via setCurrentTableName() syncs with each TargetFragment's instance of DatabaseHelper.
      *
      * Alternatively, fragments could delegate to MainActivity to handle all database operations?
+     *
+     * Alternatively, fragments could keep track of the table their data comes from and pass the table name
+     * to the appropriate functions?
      */
     private static String TABLE_NAME = "defaultWorkout";
 
@@ -54,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         createExerciseTable(db, TABLE_NAME);
 
-        createDefaultPPLTable();
+        createDefaultPPLTable(db);
     }
 
     /**
@@ -232,33 +238,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     *  Given the ID of the desired target (e.g. Chest, Arms, Abs, etc.), returns an ArrayList of all the
-     *  Exercises in the table associated with that ID.
+     *  Given the ID of the desired target (e.g. Chest, Arms, Abs, etc.), returns an
+     *  ArrayList of all the Exercises in the table associated with that ID, sorted
+     *  alphabetically by name (if a sortType was provided).
      *
      * @param targetID the target ID
+     * @param sortType the sorting criteria to use in the query (i.e. ascending/descending alphabetical order)
+     *                 or null if the Exercises should not be sorted
      * @return a list of all Exercises associated with the given target ID
      */
-    public ArrayList<Exercise> getSelectedExercises(int targetID) {
+    public ArrayList<Exercise> getSelectedExercises(int targetID, SortType sortType) {
         ArrayList<Exercise> exercises = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        String sql = "SELECT * FROM " + internalGetCurrentTable();
         if (isValidTargetID(targetID)) {
-            // Lookup all exercises with the given target ID
-            sql += " WHERE " + EXERCISE_TARGET + " = " + targetID;
-        } else {
-            // Terminate the query; lookup all exercises in the table
-            sql += ";";
-        }
-
-        try (Cursor cursor = db.rawQuery(sql, null)) {
-            if (cursor.moveToFirst()) {
-                do {
-                    exercises.add(createExerciseFromQueryResults(cursor));
-                } while(cursor.moveToNext());
+            SQLiteDatabase db = this.getReadableDatabase();
+            String orderBy = sortType != null ? EXERCISE_NAME + " COLLATE NOCASE " + sortType.toString() : null;
+            try (Cursor cursor = db.query(internalGetCurrentTable(), null, EXERCISE_TARGET + " = ?",
+                    new String[]{Integer.toString(targetID)}, null, null, orderBy)) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        exercises.add(createExerciseFromQueryResults(cursor));
+                    } while (cursor.moveToNext());
+                }
             }
+        } else {
+            Log.w("Invalid targetId", "The value of targetID ( " + targetID + ") did not match " +
+                    "a valid target ID value; returning an empty list");
         }
-
         return exercises;
     }
 
@@ -300,9 +305,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Adds an exercise to the table.
      *
      * @param newExercise to add
+     * @return the ID of the newly added row (i.e. the new Exercise's ID); an ID of -1
+     *         indicates an error occurred when adding the Exercise to the table.
      */
-    public void addExercise(Exercise newExercise) {
+    public int addExercise(Exercise newExercise) {
         SQLiteDatabase db = this.getWritableDatabase();
+        return addExercise(newExercise, db);
+    }
+
+    private int addExercise(Exercise newExercise, SQLiteDatabase db) {
         ContentValues values = new ContentValues();
         values.put(EXERCISE_NAME, newExercise.getExerciseName());
         values.put(WEIGHT, 0);
@@ -311,7 +322,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(IMAGE_PATH, newExercise.getImageResourcePath());
         values.put(EXERCISE_TARGET, newExercise.getExerciseTarget());
         values.put(WEIGHT_FLAG, newExercise.getFlaggedForIncrease());
-        db.insert(internalGetCurrentTable(), null, values);
+        long id = db.insert(internalGetCurrentTable(), null, values);
+        if (id == -1) {
+            Log.w("Add exercise failed", "Failed to add exercise " + newExercise.getExerciseName());
+        } else {
+            Log.d("Add exercise success", "Successfully added exercise " + newExercise.getExerciseName());
+        }
+        // TODO consider changing id attribute of Exercise to long instead of int so this cast isn't necessary
+        return (int) id;
     }
 
     /**
@@ -454,7 +472,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * The PPL routine below was retrieved from:
      * https://www.reddit.com/r/Fitness/comments/37ylk5/a_linear_progression_based_ppl_program_for/
      */
-    private void createDefaultPPLTable() {
+    private void createDefaultPPLTable(SQLiteDatabase db) {
         final ArrayList<Exercise> exercises = new ArrayList<>();
 
         /*
@@ -555,7 +573,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
         for (Exercise exercise : exercises) {
-            addExercise(exercise);
+            addExercise(exercise, db);
         }
     }
 
@@ -564,7 +582,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * https://www.bodybuilding.com/content/ryan-hughes-cutting-program.html
      */
     private void createDefaultCuttingTable() {
-        ContentValues values = new ContentValues();
         final ArrayList<Exercise> exercises = new ArrayList<>();
 
         /*

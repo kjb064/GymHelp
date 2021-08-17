@@ -37,9 +37,9 @@ public class TargetFragment extends Fragment {
     private ArrayList<Exercise> exercises;
     private ExerciseAdapter adapter;
     private DatabaseHelper db;
-    private ListView listView;
 
     private static final String GROUP_ID_KEY = "groupID";
+    private static final String SORT_TYPE_KEY = "sortType";
 
     /**
      * Creates a TargetFragment instance with the value of <code>targetGroupId</code> passed as one
@@ -47,12 +47,14 @@ public class TargetFragment extends Fragment {
      * within the ViewPager.
      *
      * @param targetGroupId the ID of the Target associated with the new Fragment
+     * @param sortType the sort criteria to use for displaying the Exercises
      * @return the new TargetFragment instance
      */
-    public static TargetFragment createInstance(int targetGroupId) {
+    public static TargetFragment createInstance(int targetGroupId, SortType sortType) {
         TargetFragment fragment = new TargetFragment();
         Bundle args = new Bundle();
         args.putInt(GROUP_ID_KEY, targetGroupId);
+        args.putString(SORT_TYPE_KEY, sortType != null ? sortType.name() : null);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,14 +66,15 @@ public class TargetFragment extends Fragment {
     }
 
     /**
-     * Fetches the exercises to be displayed in this TargetFragment's ListView.
+     * Fetches a List of Exercises to be displayed in this TargetFragment's ListView. The List is sorted
+     * by the given sortType, or unsorted if the sortType is null.
+     *
+     * @param sortType the sorting criteria to use when retrieving the Exercises; can be null if the
+     *                 Exercises should not be sorted
      */
-    private void fetchData() {
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            int targetID = bundle.getInt(GROUP_ID_KEY);
-            exercises = db.getSelectedExercises(targetID);
-        }
+    private void fetchData(SortType sortType) {
+        int targetId = getTargetGroupId();
+        exercises = db.getSelectedExercises(targetId, sortType);
     }
 
     @Nullable
@@ -79,7 +82,8 @@ public class TargetFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         final View rootView = inflater.inflate(R.layout.exercise_list, container, false);
-        fetchData();
+        // Fetch list of the Exercises to display, sorted according to current sort selection
+        fetchData(getSelectedSortType());
 
         // Create an {@link ArrayAdapter}, whose data source is a list of Strings. The
         // adapter knows how to create layouts for each item in the list, using the
@@ -91,7 +95,7 @@ public class TargetFragment extends Fragment {
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml file.
-        listView = rootView.findViewById(R.id.list);
+        ListView listView = rootView.findViewById(R.id.list);
 
         registerForContextMenu(listView);
 
@@ -130,6 +134,22 @@ public class TargetFragment extends Fragment {
         }
     }
 
+    private SortType getSelectedSortType() {
+        SortType sortType = null;
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            String sortName = bundle.getString(SORT_TYPE_KEY);
+            if (sortName != null) {
+                if (sortName.contentEquals(SortType.ASC.name())) {
+                    sortType = SortType.ASC;
+                } else if (sortName.contentEquals(SortType.DESC.name())) {
+                    sortType = SortType.DESC;
+                }
+            }
+        }
+        return sortType;
+    }
+
     /**
      * Called when the FloatingActionButton is clicked to add a new exercise to the currently
      * displayed TargetFragment.
@@ -153,8 +173,12 @@ public class TargetFragment extends Fragment {
     public void addNewExerciseToDatabaseAndRefresh(String name, String setsReps, String photoPath) {
         Exercise exercise = new Exercise(name, setsReps, 0, getTargetGroupId());
         exercise.setImageResourcePath(photoPath);
-        db.addExercise(exercise);
-        resetFragmentData();
+        if (db.addExercise(exercise) == -1) {
+            Toast.makeText(getContext(), "Failed to add exercise " + exercise.getExerciseName(),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            resetFragmentData(getSelectedSortType());
+        }
     }
 
     @Override
@@ -170,6 +194,7 @@ public class TargetFragment extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         // TODO find better way to determine whether the fragment is visible? (getUserVisibleHint() may not be reliable...)
+        // TODO or is it even necessary to determine if the fragment is currently visible?
         final boolean isFragmentVisibleToUser = getUserVisibleHint();
         if (isFragmentVisibleToUser) {
             Activity activity = getActivity();
@@ -192,12 +217,7 @@ public class TargetFragment extends Fragment {
                         return true;
                     }
                     case WEIGHT_FLAG_ID: {
-                        // TODO add exercise weight flag
-                        int currentFlag = exercise.getFlaggedForIncrease();
-                        int newFlag = currentFlag == 0 ? 1 : 0;
-                        exercise.setFlaggedForIncrease(newFlag);
-                        db.updateExerciseFlag(exercise);
-                        refreshFragment();
+                        toggleWeightFlag(exercise);
                         return true;
                     }
                     default:
@@ -254,13 +274,26 @@ public class TargetFragment extends Fragment {
     }
 
     /**
+     * Toggles the weight flag for the given Exercise in the database and refreshes this fragment.
+     *
+     * @param exercise the Exercise whose weight flag should be toggled
+     */
+    private void toggleWeightFlag(Exercise exercise) {
+        int currentFlag = exercise.getFlaggedForIncrease();
+        int newFlag = currentFlag == 0 ? 1 : 0;
+        exercise.setFlaggedForIncrease(newFlag);
+        db.updateExerciseFlag(exercise);
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
      * Updates the given Exercise in the database and resets this fragment's data so the updates will appear.
      *
      * @param exercise the Exercise to update
      */
     public void updateExerciseInDatabaseAndRefresh(Exercise exercise) {
         db.updateExercise(exercise);
-        resetFragmentData();
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -294,8 +327,7 @@ public class TargetFragment extends Fragment {
                     "DELETED " + exerciseName,
                     Toast.LENGTH_SHORT).show();
 
-            exercises.remove(exercise);
-            resetFragmentData();
+            adapter.remove(exercise);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -307,7 +339,7 @@ public class TargetFragment extends Fragment {
      *  after an exercise has been changed using the "Edit" menu option and when the weight
      *  has been updated.
      */
-    public void refreshFragment() {
+    private void refreshFragment() {
         FragmentManager fragmentManager = getFragmentManager();
         if (fragmentManager != null) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -320,19 +352,11 @@ public class TargetFragment extends Fragment {
     }
 
     /**
-     * Retrieves the appropriate data from the database using fetchData and then resets the
-     * listView to reflect the changes that have been made. Used after adding a new exercise
-     * (from the MainActivity) or selecting the "Delete" menu option (this method of resetting
-     * the data has proved to be the most reliable, as other methods sometimes fail).
+     * Fetches the Exercises for this fragment and resets the adapter.
      */
-    public void resetFragmentData() {
-        // TODO find better way to determine whether the fragment is visible? (getUserVisibleHint() may not be reliable...)
-        if (getUserVisibleHint()) {
-            fetchData();
-            adapter.clear();
-            adapter.addAll(exercises);
-            adapter.notifyDataSetChanged();
-            listView.invalidate();
-        }
+    public void resetFragmentData(SortType sortType) {
+        fetchData(sortType);
+        adapter.clear();
+        adapter.addAll(exercises);
     }
 }

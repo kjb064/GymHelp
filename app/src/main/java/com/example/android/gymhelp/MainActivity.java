@@ -32,8 +32,9 @@ public class MainActivity extends BaseActivity {
     private String searchText = "";
     private DrawerLayout drawerLayout;
     private ListView drawerList;
-    DrawerItemCustomAdapter drawerAdapter;
+    private DrawerItemCustomAdapter drawerAdapter;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private SortType selectedSortType = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,29 +90,40 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int tabPosition = tabLayout.getSelectedTabPosition();
-        TargetFragment targetFragment = (TargetFragment) getSupportFragmentManager()
-                .findFragmentByTag(Integer.toString(tabPosition));
+        if (item.isCheckable() && !item.isChecked()) {
+            item.setChecked(true);
+        }
 
-        switch (item.getItemId()) {
-            // TODO add ability to sort exercises
-//            case R.id.sort_ascending:
-//                targetFragment.resetFragmentDataSorted(Constants.SORT_ASCENDING);
-//                break;
-//            case R.id.sort_descending:
-//                targetFragment.resetFragmentDataSorted(Constants.SORT_DESCENDING);
-//                break;
-//            case R.id.unsorted:
-//                targetFragment.resetFragmentData();
-//                break;
-            case android.R.id.home:
-                if (drawerLayout.isDrawerOpen(drawerList)) {
-                    drawerLayout.closeDrawer(drawerList);
-                } else {
-                    drawerLayout.openDrawer(drawerList);
-                }
+        int itemId = item.getItemId();
+        if (itemId == R.id.sort_ascending) {
+            selectedSortType = SortType.ASC;
+            targetAdapter.notifyDataSetChanged();
+            return true;
+        } else if (itemId == R.id.sort_descending) {
+            selectedSortType = SortType.DESC;
+            targetAdapter.notifyDataSetChanged();
+            return true;
+        } else if (itemId == R.id.unsorted) {
+            // TODO represent "unsorted" as null for now
+            selectedSortType = null;
+            targetAdapter.notifyDataSetChanged();
+            return true;
+        } else if (itemId == android.R.id.home) {
+            toggleDrawer();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Toggles opening/closing the application's drawer.
+     */
+    private void toggleDrawer() {
+        if (drawerLayout.isDrawerOpen(drawerList)) {
+            drawerLayout.closeDrawer(drawerList);
+        } else {
+            drawerLayout.openDrawer(drawerList);
+        }
     }
 
     /**
@@ -119,9 +131,7 @@ public class MainActivity extends BaseActivity {
      */
     private void refreshProgramsInDrawer() {
         drawerAdapter.clear();
-        List<String> programsForDrawer = getProgramsForDrawer();
-        drawerAdapter.addAll(programsForDrawer);
-        drawerAdapter.notifyDataSetChanged();
+        drawerAdapter.addAll(getProgramsForDrawer());
     }
 
     /**
@@ -213,6 +223,11 @@ public class MainActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.search_menu, menu);
+        initializeSearch(menu);
+        return true;
+    }
+
+    private void initializeSearch(Menu menu) {
         final MenuItem search = menu.findItem(R.id.search);
         final SearchView searchView = (SearchView) search.getActionView();
 
@@ -268,6 +283,14 @@ public class MainActivity extends BaseActivity {
                 return false;
             }
         });
-        return true;
+    }
+
+    /**
+     * Gets the currently selected sort type.
+     *
+     * @return the currently selected sort type
+     */
+    public SortType getSelectedSortType() {
+        return this.selectedSortType;
     }
 }
