@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.exifinterface.media.ExifInterface;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -82,7 +84,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
 
         String defaultImageName = "baseline_image_black_48dp";
         int imageID;
-        if (currentExercise.hasImagePath()) {
+        if (currentExercise.hasImage()) {
             // Get the dimensions of the View
             int targetW = (int) resources.getDimension(R.dimen.list_item_height);
             int targetH = targetW;
@@ -90,7 +92,10 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             // Get the dimensions of the bitmap
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(currentExercise.getImageResourcePath(), bmOptions);
+
+            File externalStorage = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File imageFile = new File(externalStorage, currentExercise.getImageFileName());
+            BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
             int photoW = bmOptions.outWidth;
             int photoH = bmOptions.outHeight;
 
@@ -107,7 +112,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             int orientation;
             int rotationAngle = 0;
             try {
-                ExifInterface exifInterface = new ExifInterface(currentExercise.getImageResourcePath());
+                ExifInterface exifInterface = new ExifInterface(currentExercise.getImageFileName());
                 orientString = exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION);
                 orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
 
@@ -127,7 +132,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
                 e.printStackTrace();
             }
 
-            Bitmap bitmap = BitmapFactory.decodeFile(currentExercise.getImageResourcePath(), bmOptions);
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
 
             if (bitmap != null) {
                 Matrix matrix = new Matrix();
@@ -139,7 +144,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
                 imageID = resources.getIdentifier(defaultImageName, "drawable", context.getPackageName());
                 iconView.setImageResource(imageID);
                 Toast.makeText(context, "Could not load image for " + currentExercise.getExerciseName()
-                + " from " + currentExercise.getImageResourcePath(), Toast.LENGTH_LONG).show();
+                + " from " + currentExercise.getImageFileName(), Toast.LENGTH_LONG).show();
             }
         } else {
             // otherwise, use default image for iconView

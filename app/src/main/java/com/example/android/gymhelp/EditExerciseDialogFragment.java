@@ -39,13 +39,13 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
         View dialogLayout  = super.onCreateView(inflater, container, savedInstanceState);
 
         if (dialogLayout != null) {
-            TextView photoPathTextView = dialogLayout.findViewById(R.id.photo_path_text_view);
+            TextView photoPathTextView = dialogLayout.findViewById(R.id.image_name_text_view);
             CheckBox checkBox = dialogLayout.findViewById(R.id.photo_check_box);
 
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 checkBox.setClickable(isChecked);
                 if (!isChecked) {
-                    photoPathTextView.setText(Constants.NO_IMAGE_PROVIDED);
+                    photoPathTextView.setText(null);
                     checkBox.setText(R.string.no_photo_selected);
                 } else {
                     checkBox.setText(R.string.photo_selected);
@@ -56,9 +56,9 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
             Bundle bundle = getArguments();
             if (bundle != null) {
                 Exercise exercise = bundle.getParcelable("Exercise");
-                if (exercise.hasImagePath()) {
+                if (exercise.hasImage()) {
                     checkBox.setChecked(true);
-                    photoPathTextView.setText(exercise.getImageResourcePath());
+                    photoPathTextView.setText(exercise.getImageFileName());
                 }
 
                 final EditText nameEditText = dialogLayout.findViewById(R.id.name_edit_text);
@@ -76,10 +76,10 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
      *
      * @param name the name of the Exercise
      * @param setsReps the sets and reps for the Exercise
-     * @param photoPath the path to the photo associated with the Exercise
+     * @param imageFileName the file name of the photo associated with the Exercise
      */
     @Override
-    protected void submitExercise(String name, String setsReps, String photoPath) {
+    protected void submitExercise(String name, String setsReps, String imageFileName) {
         Bundle bundle = getArguments();
         if (bundle != null) {
             Exercise exercise = bundle.getParcelable("Exercise");
@@ -87,14 +87,14 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
             exercise.setExerciseName(name);
             exercise.setSetsAndReps(setsReps);
 
-            final String oldPhotoPath = exercise.getImageResourcePath();
-            boolean imageRemoved = photoPath.contentEquals(Constants.NO_IMAGE_PROVIDED) &&
-                    !photoPath.contentEquals(oldPhotoPath);
-            exercise.setImageResourcePath(photoPath);
+            final String oldFileName = exercise.getImageFileName();
+            boolean imageRemoved = imageFileName != null ?
+                    !imageFileName.equals(oldFileName) : oldFileName != null;
+            exercise.setImageFileName(imageFileName);
 
             TargetFragment parentFragment = (TargetFragment) getParentFragment();
             if (parentFragment != null) {
-                if (imageRemoved) parentFragment.deleteExerciseImage(exercise.getExerciseID(), oldPhotoPath);
+                if (imageRemoved) parentFragment.deleteExerciseImage(exercise.getExerciseID(), oldFileName);
                 parentFragment.updateExerciseInDatabaseAndRefresh(exercise);
             }
         }

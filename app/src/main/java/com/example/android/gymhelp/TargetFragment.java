@@ -172,7 +172,7 @@ public class TargetFragment extends Fragment {
      */
     public void addNewExerciseToDatabaseAndRefresh(String name, String setsReps, String photoPath) {
         Exercise exercise = new Exercise(name, setsReps, 0, getTargetGroupId());
-        exercise.setImageResourcePath(photoPath);
+        exercise.setImageFileName(photoPath);
         if (db.addExercise(exercise) == -1) {
             Toast.makeText(getContext(), "Failed to add exercise " + exercise.getExerciseName(),
                     Toast.LENGTH_SHORT).show();

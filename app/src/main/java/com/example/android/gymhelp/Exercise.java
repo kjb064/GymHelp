@@ -11,7 +11,7 @@ public class Exercise implements Parcelable {
     private int exerciseID;
     private String exerciseName;
     private String setsAndReps;
-    private String imageResourcePath = Constants.NO_IMAGE_PROVIDED;
+    private String imageFileName;
     private final float recentWeight;
     private final int exerciseTarget;
     private String date = Constants.DEFAULT_DATE;
@@ -40,17 +40,17 @@ public class Exercise implements Parcelable {
      * @param exerciseName the name of the Exercise
      * @param setsAndReps the sets and reps
      * @param recentWeight the recent weight
-     * @param imageResourcePath the path to the associated image
+     * @param imageFileName the file name of the associated image
      * @param date the date the Exercise's recent weight was last updated
      * @param exerciseTarget the target ID
      */
     public Exercise(int exerciseID, String exerciseName, String setsAndReps, float recentWeight,
-                    String imageResourcePath, String date, int exerciseTarget, int weightFlag) {
+                    String imageFileName, String date, int exerciseTarget, int weightFlag) {
         this.exerciseID = exerciseID;
         this.exerciseName = exerciseName;
         this.setsAndReps = setsAndReps;
         this.recentWeight = recentWeight;
-        this.imageResourcePath = imageResourcePath;
+        this.imageFileName = imageFileName;
         this.date = date;
         this.exerciseTarget = exerciseTarget;
         this.flaggedForIncrease = weightFlag;
@@ -66,7 +66,7 @@ public class Exercise implements Parcelable {
         this.exerciseName = source.readString();
         this.setsAndReps = source.readString();
         this.recentWeight = source.readFloat();
-        this.imageResourcePath = source.readString();
+        this.imageFileName = source.readString();
         this.date = source.readString();
         this.exerciseTarget = source.readInt();
     }
@@ -98,8 +98,8 @@ public class Exercise implements Parcelable {
     /**
      * @return whether this Exercise has an associated image or not
      */
-    public boolean hasImagePath() {
-        return imageResourcePath != null && !Constants.NO_IMAGE_PROVIDED.equals(imageResourcePath);
+    public boolean hasImage() {
+        return imageFileName != null && !Constants.NO_IMAGE_PROVIDED.equals(imageFileName);
     }
 
     public String getDate() {
@@ -110,12 +110,12 @@ public class Exercise implements Parcelable {
         return this.exerciseTarget;
     }
 
-    public void setImageResourcePath(String path) {
-        this.imageResourcePath = path;
+    public void setImageFileName(String name) {
+        this.imageFileName = name;
     }
 
-    public String getImageResourcePath() {
-        return this.imageResourcePath;
+    public String getImageFileName() {
+        return this.imageFileName;
     }
 
     void setFlaggedForIncrease(int flag) {
@@ -138,7 +138,7 @@ public class Exercise implements Parcelable {
         dest.writeString(this.exerciseName);
         dest.writeString(this.setsAndReps);
         dest.writeFloat(this.recentWeight);
-        dest.writeString(this.imageResourcePath);
+        dest.writeString(this.imageFileName);
         dest.writeString(this.date);
         dest.writeInt(this.exerciseTarget);
     }

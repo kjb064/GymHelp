@@ -26,6 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,6 +41,8 @@ public class AddExerciseDialogFragment extends DialogFragment {
     protected final int REQUEST_IMAGE_CAPTURE = 1;
     protected final int STORAGE_PERMISSION_CODE = 2;
     protected final int PICK_IMAGE = 100;
+
+    private String imageFileName;
 
     /**
      * Creates a new AddExerciseDialogFragment with the given title as an argument.
@@ -86,13 +90,13 @@ public class AddExerciseDialogFragment extends DialogFragment {
     private void onClickPositiveButton(View dialogLayout) {
         EditText nameEditText = dialogLayout.findViewById(R.id.name_edit_text);
         EditText setsRepsEditText = dialogLayout.findViewById(R.id.sets_reps_edit_text);
-        TextView photoPathTextView = dialogLayout.findViewById(R.id.photo_path_text_view);
+        TextView imageNameTextView = dialogLayout.findViewById(R.id.image_name_text_view);
 
         final String name = nameEditText.getText().toString().trim();
         final String setsReps = setsRepsEditText.getText().toString().trim();
-        final String photoPath = photoPathTextView.getText().toString().isEmpty() ?
-                Constants.NO_IMAGE_PROVIDED
-                : photoPathTextView.getText().toString();
+        final String photoPath = imageNameTextView.getText().toString().isEmpty() ?
+                null
+                : imageNameTextView.getText().toString();
 
         // TODO investigate if possible to disable OK button until all text fields have text.
         // TODO would need to ensure the same restriction is applied for the dialog after selecting the "Edit" option
@@ -110,12 +114,12 @@ public class AddExerciseDialogFragment extends DialogFragment {
      *
      * @param name the name of the Exercise
      * @param setsReps the sets and reps for the Exercise
-     * @param photoPath the path to the photo associated with the Exercise
+     * @param imageFileName the file name of the photo associated with the Exercise
      */
-    protected void submitExercise(String name, String setsReps, String photoPath) {
+    protected void submitExercise(String name, String setsReps, String imageFileName) {
         TargetFragment parentFragment = (TargetFragment) getParentFragment();
         if (parentFragment != null) {
-            parentFragment.addNewExerciseToDatabaseAndRefresh(name, setsReps, photoPath);
+            parentFragment.addNewExerciseToDatabaseAndRefresh(name, setsReps, imageFileName);
         }
     }
 
@@ -127,22 +131,24 @@ public class AddExerciseDialogFragment extends DialogFragment {
      */
     public void onClickTakePhotoButton(View button) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
         final Activity activity = getActivity();
         // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
+        if (activity != null && takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
+            File photoFile = null;
             try {
                 // Create the File where the photo should go
-                File photoFile = createImageFile();
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Toast.makeText(activity, "Something went wrong. Could not create file.", Toast.LENGTH_SHORT).show();
+                Log.e("Error creating File", Log.getStackTraceString(ex));
+            }
+            if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(activity,
                         "com.example.android.gymhelp.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Toast.makeText(activity, "Something went wrong. Could not create file.", Toast.LENGTH_SHORT).show();
-                Log.e("Error creating File", Log.getStackTraceString(ex));
             }
         }
     }
@@ -154,16 +160,21 @@ public class AddExerciseDialogFragment extends DialogFragment {
      * @return the image File
      */
     private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        return File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",   /* suffix */
-                storageDir     /* directory */
-        );
+        Activity activity = getActivity();
+        if (activity != null) {
+            File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            // Create an image file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+            String name = "JPEG_" + timeStamp + "_";
+            File imageFile = File.createTempFile(
+                    name,  /* prefix */
+                    ".jpg",   /* suffix */
+                    storageDir     /* directory */
+            );
+            this.imageFileName = imageFile.getName();
+            return imageFile;
+        }
+        return null;
     }
 
     /**
@@ -217,7 +228,6 @@ public class AddExerciseDialogFragment extends DialogFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO for image selection, should create a copy of the image and save it within a directory only accessible by the application.
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
                 handleImageCapture(resultCode, data);
@@ -241,12 +251,11 @@ public class AddExerciseDialogFragment extends DialogFragment {
      */
     private void handleImageCapture(int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            String imagePath = getPath(data.getData());
             View dialogLayout = getView();
             if (dialogLayout != null) {
-                // Store the imagePath in the textView for later retrieval
-                TextView photoPathTextView = dialogLayout.findViewById(R.id.photo_path_text_view);
-                photoPathTextView.setText(imagePath);
+                // Store the image file name in the textView for later retrieval
+                TextView fileNameTextView = dialogLayout.findViewById(R.id.image_name_text_view);
+                fileNameTextView.setText(this.imageFileName);
 
                 CheckBox checkBox = dialogLayout.findViewById(R.id.photo_check_box);
                 checkBox.setClickable(true);
@@ -254,12 +263,12 @@ public class AddExerciseDialogFragment extends DialogFragment {
                 checkBox.setChecked(true);
                 checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (!isChecked) {
-                        if (!imagePath.isEmpty()) {
-                            File deleteFile = new File(imagePath);
+                        if (this.imageFileName != null && !this.imageFileName.isEmpty()) {
+                            File deleteFile = new File(this.imageFileName);
                             if (deleteFile.delete()) {
-                                Log.d("Image deletion", "Successfully deleted file at " + imagePath);
+                                Log.d("Image deletion", "Successfully deleted file at " + this.imageFileName);
                             } else {
-                                Log.e("Image deletion", "Could not delete file at " + imagePath);
+                                Log.e("Image deletion", "Could not delete file at " + this.imageFileName);
                             }
                         }
                         checkBox.setClickable(false);
@@ -270,6 +279,8 @@ public class AddExerciseDialogFragment extends DialogFragment {
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Log.d("handleImageCapture()", "The user cancelled or an error occurred.");
         }
+
+        this.imageFileName = null;
     }
 
     /**
@@ -282,23 +293,50 @@ public class AddExerciseDialogFragment extends DialogFragment {
     private void handlePickImage(int resultCode, Intent data) {
         // TODO: Verify the selected file is a valid type?
         if (resultCode == Activity.RESULT_OK) {
-            final String photoPath = getPath(data.getData());
+            boolean success = false;
+            String path = getPath(data.getData());
+            if (path != null) {
+                File selectedFile = new File(path);
+                try {
+                    // Create File within external directory; will set value of imageFileName
+                    File copiedFile = createImageFile();
+                    // copy the selected file to external directory
+                    try (FileInputStream inputStream = new FileInputStream(selectedFile);
+                         FileOutputStream outputStream = new FileOutputStream(copiedFile)) {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) > 0) {
+                            outputStream.write(buffer, 0, bytesRead);
+                        }
+                    }
+                    success = true;
+                } catch (IOException e) {
+                    // Error occurred while creating the File
+                    Toast.makeText(getActivity(), "Something went wrong. Could not create file.", Toast.LENGTH_SHORT).show();
+                    Log.e("Error creating File", Log.getStackTraceString(e));
+                }
+            }
+
             View dialogLayout = getView();
             if (dialogLayout != null) {
-                TextView photoPathTextView = dialogLayout.findViewById(R.id.photo_path_text_view);
-                photoPathTextView.setText(photoPath);
-
                 CheckBox checkBox = dialogLayout.findViewById(R.id.photo_check_box);
-                checkBox.setClickable(true);
-                checkBox.setText(R.string.photo_selected);
-                checkBox.setChecked(true);
                 checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (!isChecked) {
                         checkBox.setClickable(false);
                         checkBox.setText(R.string.no_photo_selected);
                     }
                 });
+
+                TextView imageNameTextView = dialogLayout.findViewById(R.id.image_name_text_view);
+                if (success) {
+                    imageNameTextView.setText(this.imageFileName);
+                    checkBox.setText(R.string.photo_selected);
+                    checkBox.setClickable(true);
+                    checkBox.setChecked(true);
+                }
             }
+
+            this.imageFileName = null;
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Log.d("handlePickImage()", "The user cancelled or an error occurred.");
         }
@@ -312,12 +350,19 @@ public class AddExerciseDialogFragment extends DialogFragment {
      */
     public String getPath(Uri uri) {
         // TODO verify what is being done here is necessary and if this is the correct way to do this
-        // TODO DATA is deprecated...
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getActivity().managedQuery(uri, projection, null, null, null);
-        getActivity().startManagingCursor(cursor);
-        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(columnIndex);
+
+        Activity activity = getActivity();
+        if (activity != null) {
+            // TODO DATA is deprecated...
+            String[] projection = {MediaStore.Images.Media.DATA};
+            try (Cursor cursor = activity.managedQuery(uri, projection, null,
+                    null, null)) {
+                activity.startManagingCursor(cursor);
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                return cursor.getString(columnIndex);
+            }
+        }
+        return null;
     }
 }
