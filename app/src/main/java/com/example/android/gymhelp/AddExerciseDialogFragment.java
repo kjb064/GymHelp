@@ -15,6 +15,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +39,8 @@ import java.util.Locale;
  * DialogFragment for the "Add Exercise" dialog.
  */
 public class AddExerciseDialogFragment extends DialogFragment {
+    protected EditText nameEditText;
+    protected EditText setsRepsEditText;
 
     protected final int REQUEST_IMAGE_CAPTURE = 1;
     protected final int STORAGE_PERMISSION_CODE = 2;
@@ -78,6 +82,30 @@ public class AddExerciseDialogFragment extends DialogFragment {
         Button dismissButton = dialogLayout.findViewById(R.id.dismiss_button);
         dismissButton.setOnClickListener((view) -> getDialog().dismiss());
 
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String name = nameEditText.getText().toString().trim();
+                String setsReps = setsRepsEditText.getText().toString().trim();
+                okButton.setEnabled(!name.isEmpty() && !setsReps.isEmpty());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Do nothing
+            }
+        };
+
+        this.nameEditText = dialogLayout.findViewById(R.id.name_edit_text);
+        this.nameEditText.addTextChangedListener(textWatcher);
+        this.setsRepsEditText = dialogLayout.findViewById(R.id.sets_reps_edit_text);
+        this.setsRepsEditText.addTextChangedListener(textWatcher);
+
         Button addPhotoButton = dialogLayout.findViewById(R.id.add_photo_button);
         addPhotoButton.setOnClickListener(this::onClickAddPhotoButton);
 
@@ -88,8 +116,6 @@ public class AddExerciseDialogFragment extends DialogFragment {
     }
 
     private void onClickPositiveButton(View dialogLayout) {
-        EditText nameEditText = dialogLayout.findViewById(R.id.name_edit_text);
-        EditText setsRepsEditText = dialogLayout.findViewById(R.id.sets_reps_edit_text);
         TextView imageNameTextView = dialogLayout.findViewById(R.id.image_name_text_view);
 
         final String name = nameEditText.getText().toString().trim();
@@ -98,14 +124,7 @@ public class AddExerciseDialogFragment extends DialogFragment {
                 null
                 : imageNameTextView.getText().toString();
 
-        // TODO investigate if possible to disable OK button until all text fields have text.
-        // TODO would need to ensure the same restriction is applied for the dialog after selecting the "Edit" option
-        // Check that both fields have been filled in
-        if (name.isEmpty() || setsReps.isEmpty()) {
-            Toast.makeText(getActivity(), "Empty texts fields are not allowed.", Toast.LENGTH_SHORT).show();
-        } else {
-            submitExercise(name, setsReps, photoPath);
-        }
+        submitExercise(name, setsReps, photoPath);
         getDialog().dismiss();
     }
 
