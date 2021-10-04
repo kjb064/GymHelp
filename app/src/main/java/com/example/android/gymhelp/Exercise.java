@@ -1,13 +1,7 @@
 package com.example.android.gymhelp;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.NumberPicker;
 
 /**
  * Represents an Exercise stored in a table in the database.

@@ -143,8 +143,8 @@ public class AddExerciseDialogFragment extends DialogFragment {
     }
 
     /**
-     * Called when the "Take Photo" button of the add_exercise_dialog layout is clicked.
-     * Creates an Intent to load the device's camera, assuming it exists.
+     * Called when the "Take Photo" button is clicked. Creates an Intent to load
+     * the device's camera, assuming it exists.
      *
      * @param button the "Take Photo" button
      */
@@ -173,8 +173,8 @@ public class AddExerciseDialogFragment extends DialogFragment {
     }
 
     /**
-     * Called by onClickTakePhotoButton to create a File for a photo taken by the camera.
-     * The files created by this method have unique names due to the use of a timestamp.
+     * Creates a uniquely named File within the app's external files directory to
+     * save an image file to.
      *
      * @return the image File
      */
@@ -182,7 +182,7 @@ public class AddExerciseDialogFragment extends DialogFragment {
         Activity activity = getActivity();
         if (activity != null) {
             File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            // Create an image file name
+            // Create a unique image file name using a timestamp
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
             String name = "JPEG_" + timeStamp + "_";
             File imageFile = File.createTempFile(
@@ -197,9 +197,9 @@ public class AddExerciseDialogFragment extends DialogFragment {
     }
 
     /**
-     * Called when the "Add Photo" button of add_exercise_dialog layout is clicked.
-     * Creates an Intent to bring the user to the gallery (assuming permission to do so has already
-     * been granted). Only images are selectable from the gallery.
+     * Called when the "Add Photo" button is clicked. Creates an Intent to bring the user
+     * to the gallery (assuming permission to do so has already been granted). Only
+     * images are selectable from the gallery.
      *
      * @param addPhotoButton the "Add Photo" Button
      */
