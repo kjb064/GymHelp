@@ -205,20 +205,18 @@ public class AddExerciseDialogFragment extends DialogFragment {
      */
     public void onClickAddPhotoButton(View addPhotoButton) {
         // Verify that permission to read external storage has been granted
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_GRANTED) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                    PackageManager.PERMISSION_GRANTED) {
 
-            // Save a selected photo to app...
-            Intent gallery = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            gallery.setType("image/*");
-            startActivityForResult(gallery, PICK_IMAGE);
-            // TODO determine if this method is better than above (UPDATE: Method above works with the way the code is currently written...)
-//            Intent gallery = new Intent();
-//            gallery.setType("image/*");
-//            gallery.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(Intent.createChooser(gallery, "Select image"), PICK_IMAGE);
-        } else {
-            requestStoragePermission();
+                // Save a selected photo to app...
+                Intent gallery = new Intent(Intent.ACTION_PICK);
+                gallery.setDataAndType(android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI, "image/*");
+                startActivityForResult(gallery, PICK_IMAGE);
+            } else {
+                requestStoragePermission(activity);
+            }
         }
     }
 
@@ -226,13 +224,14 @@ public class AddExerciseDialogFragment extends DialogFragment {
      * Called the first time the user ever tries to click the "Add Photo" button.
      * A dialog asking the user for permission to access their device's files will be displayed with the
      * options to agree or decline.
+     *
+     * @param activity the current Activity
      */
-    private void requestStoragePermission() {
-        Activity activity = getActivity();
+    private void requestStoragePermission(Activity activity) {
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
-            new android.support.v7.app.AlertDialog.Builder(getActivity())
+            new android.support.v7.app.AlertDialog.Builder(activity)
                     .setTitle("Permission needed")
                     .setMessage("Permission is required to access images saved to this device.")
                     .setPositiveButton("Accept", (dialog, which) -> ActivityCompat.requestPermissions(activity,
@@ -249,7 +248,7 @@ public class AddExerciseDialogFragment extends DialogFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_IMAGE_CAPTURE:
-                handleImageCapture(resultCode, data);
+                handleImageCapture(resultCode);
                 break;
             case PICK_IMAGE:
                 handlePickImage(resultCode, data);
@@ -266,9 +265,8 @@ public class AddExerciseDialogFragment extends DialogFragment {
      * on their device.
      *
      * @param resultCode the result code
-     * @param data the result data
      */
-    private void handleImageCapture(int resultCode, Intent data) {
+    private void handleImageCapture(int resultCode) {
         if (resultCode == Activity.RESULT_OK) {
             View dialogLayout = getView();
             if (dialogLayout != null) {
