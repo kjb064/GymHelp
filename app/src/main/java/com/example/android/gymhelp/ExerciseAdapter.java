@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,78 +80,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         int visibility = currentExercise.getFlaggedForIncrease() == 1 ? View.VISIBLE : View.INVISIBLE;
         increaseWeightTextView.setVisibility(visibility);
 
-        // Find the ImageView in the list_item.xml layout with the ID "image"
-        ImageView iconView = listItemView.findViewById(R.id.image);
-
-        String defaultImageName = "baseline_image_black_48dp";
-        int imageID;
-        if (currentExercise.hasImage()) {
-            // Get the dimensions of the View
-            int targetW = (int) resources.getDimension(R.dimen.list_item_height);
-            int targetH = targetW;
-
-            // Get the dimensions of the bitmap
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-
-            File externalStorage = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File imageFile = new File(externalStorage, currentExercise.getImageFileName());
-            BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
-
-            // Determine how much to scale down the image
-            int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-            // Decode the image file into a Bitmap sized to fill the View
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
-
-            // Determine the orientation, adjust if necessary
-            String orientString;
-            int orientation;
-            int rotationAngle = 0;
-            try {
-                ExifInterface exifInterface = new ExifInterface(currentExercise.getImageFileName());
-                orientString = exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION);
-                orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
-
-                switch (orientation) {
-                    case ExifInterface.ORIENTATION_ROTATE_90:
-                        rotationAngle = 90;
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_180:
-                        rotationAngle = 180;
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_270:
-                         rotationAngle = 270;
-                        break;
-                }
-            } catch (IOException e) {
-                // TODO determine what to do upon exception; currently just continues executing method...
-                e.printStackTrace();
-            }
-
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
-
-            if (bitmap != null) {
-                Matrix matrix = new Matrix();
-                matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bmOptions.outWidth, bmOptions.outHeight, matrix, true);
-                iconView.setImageBitmap(bitmap);
-            } else {
-                // Failed to get image bitmap, use default image
-                imageID = resources.getIdentifier(defaultImageName, "drawable", context.getPackageName());
-                iconView.setImageResource(imageID);
-                Toast.makeText(context, "Could not load image for " + currentExercise.getExerciseName()
-                + " from " + currentExercise.getImageFileName(), Toast.LENGTH_LONG).show();
-            }
-        } else {
-            // otherwise, use default image for iconView
-            imageID = resources.getIdentifier(defaultImageName, "drawable", context.getPackageName());
-            iconView.setImageResource(imageID);
-        }
+        displayExerciseImage(listItemView, currentExercise);
 
         // Set the theme color for the list item
         View textContainer = listItemView.findViewById(R.id.text_container);
@@ -164,5 +94,91 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
         // Return the whole list item layout
         // so that it can be shown in the ListView
         return listItemView;
+    }
+
+    private void displayExerciseImage(View listItemView, Exercise currentExercise) {
+        // Find the ImageView in the list_item.xml layout with the ID "image"
+        ImageView iconView = listItemView.findViewById(R.id.image);
+        if (currentExercise.hasImage()) {
+            // Get the dimensions of the View
+            int dimension = (int) resources.getDimension(R.dimen.list_item_height);
+
+            // Get the dimensions of the bitmap
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+
+            File externalStorage = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File imageFile = new File(externalStorage, currentExercise.getImageFileName());
+            BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
+            int photoWidth = bmOptions.outWidth;
+            int photoHeight = bmOptions.outHeight;
+
+            // Determine how much to scale down the image
+            int scaleFactor = Math.min(photoWidth/dimension, photoHeight/dimension);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inPurgeable = true;
+
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
+            if (bitmap != null) {
+                Matrix matrix = new Matrix();
+                int rotationAngle = getImageRotationAngle(currentExercise.getImageFileName());
+                matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bmOptions.outWidth, bmOptions.outHeight, matrix, true);
+                iconView.setImageBitmap(bitmap);
+            } else {
+                // Failed to get image bitmap, use default image
+                loadDefaultImage(iconView);
+                Toast.makeText(context, "Could not load image for " + currentExercise.getExerciseName()
+                        + " from " + currentExercise.getImageFileName(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            // otherwise, use default image for iconView
+            loadDefaultImage(iconView);
+        }
+    }
+
+    /**
+     * Determines the orientation of the image and returns the degrees of rotation required to display
+     * the image properly in an ImageView.
+     *
+     * @param imageFileName the file name of the image
+     * @return the degrees of rotation to properly display the image
+     */
+    private int getImageRotationAngle(String imageFileName) {
+        int rotationAngle = 0;
+        try {
+            ExifInterface exifInterface = new ExifInterface(imageFileName);
+            String orientString = exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION);
+            int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotationAngle = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotationAngle = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotationAngle = 270;
+                    break;
+            }
+        } catch (IOException e) {
+            Log.e("getImageRotationAngle()", "Error occurred while retrieving file " +
+                    "descriptor for " + imageFileName +"; Returning 0", e);
+        }
+        return rotationAngle;
+    }
+
+    /**
+     * Loads the default image into the given ImageView.
+     *
+     * @param iconView to set the image for
+     */
+    private void loadDefaultImage(ImageView iconView) {
+        int imageID = resources.getIdentifier("baseline_image_black_48dp", "drawable", context.getPackageName());
+        iconView.setImageResource(imageID);
     }
 }
