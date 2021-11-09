@@ -88,8 +88,16 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
             exercise.setSetsAndReps(setsReps);
 
             final String oldFileName = exercise.getImageFileName();
-            boolean imageRemoved = imageFileName != null ?
-                    !imageFileName.equals(oldFileName) : oldFileName != null;
+            // Check if the image was removed or changed; may have to delete the old image from storage.
+            boolean imageRemoved = false;
+            if (exercise.hasImage()) {
+                if (imageFileName == null) {
+                    imageRemoved = true;
+                } else {
+                    imageRemoved = !imageFileName.equals(oldFileName);
+                }
+            }
+
             exercise.setImageFileName(imageFileName);
 
             TargetFragment parentFragment = (TargetFragment) getParentFragment();

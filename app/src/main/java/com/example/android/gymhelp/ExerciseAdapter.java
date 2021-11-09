@@ -114,7 +114,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             int photoHeight = bmOptions.outHeight;
 
             // Determine how much to scale down the image
-            int scaleFactor = Math.min(photoWidth/dimension, photoHeight/dimension);
+            int scaleFactor = Math.min(photoWidth / dimension, photoHeight / dimension);
 
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
@@ -124,7 +124,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getPath(), bmOptions);
             if (bitmap != null) {
                 Matrix matrix = new Matrix();
-                int rotationAngle = getImageRotationAngle(currentExercise.getImageFileName());
+                int rotationAngle = getImageRotationAngle(imageFile);
                 matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bmOptions.outWidth, bmOptions.outHeight, matrix, true);
                 iconView.setImageBitmap(bitmap);
@@ -144,13 +144,13 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
      * Determines the orientation of the image and returns the degrees of rotation required to display
      * the image properly in an ImageView.
      *
-     * @param imageFileName the file name of the image
+     * @param imageFile the image file
      * @return the degrees of rotation to properly display the image
      */
-    private int getImageRotationAngle(String imageFileName) {
+    private int getImageRotationAngle(File imageFile) {
         int rotationAngle = 0;
         try {
-            ExifInterface exifInterface = new ExifInterface(imageFileName);
+            ExifInterface exifInterface = new ExifInterface(imageFile);
             String orientString = exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION);
             int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
 
@@ -167,7 +167,7 @@ public class ExerciseAdapter extends ArrayAdapter<Exercise> {
             }
         } catch (IOException e) {
             Log.e("getImageRotationAngle()", "Error occurred while retrieving file " +
-                    "descriptor for " + imageFileName +"; Returning 0", e);
+                    "descriptor for " + imageFile.getName() +"; Returning 0", e);
         }
         return rotationAngle;
     }

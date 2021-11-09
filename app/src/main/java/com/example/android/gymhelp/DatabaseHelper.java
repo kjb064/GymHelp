@@ -16,9 +16,6 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    // TODO refactor to use SQLiteDatabase methods where applicable
-    // TODO refactor to call getWriteable()/getReadableDatabase() within try with resource blocks
-
     // TODO: Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
 
     private final Context context;
@@ -269,7 +266,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String orderBy = sortType != null ? EXERCISE_NAME + " COLLATE NOCASE " + sortType.toString() : null;
             try (SQLiteDatabase db = this.getReadableDatabase();
                  Cursor cursor = db.query(internalGetCurrentTable(), null, EXERCISE_TARGET + " = ?",
-                    new String[]{Integer.toString(targetID)}, null, null, orderBy)) {
+                    new String[] { String.valueOf(targetID) }, null, null, orderBy)) {
                 if (cursor.moveToFirst()) {
                     do {
                         exercises.add(createExerciseFromQueryResults(cursor));
@@ -309,12 +306,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Calendar calendar = Calendar.getInstance();
             String currentDate = formatter.format(calendar.getTime());
 
-            // TODO check return value of update()
             ContentValues values = new ContentValues();
             values.put(WEIGHT, weight);
             values.put(DATE, currentDate);
             String exerciseIDString = Integer.toString(exerciseID);
-            db.update(internalGetCurrentTable(), values, ID + " = ?", new String[] {exerciseIDString});
+            int affectedRows = db.update(internalGetCurrentTable(), values, ID + " = ?",
+                    new String[] {exerciseIDString});
+            if (affectedRows == 0) {
+                Log.w("Update weight", "Failed to update weight for exercise with ID: "
+                        + exerciseIDString + "; Rows affected: " + affectedRows);
+            }
         }
     }
 
@@ -356,63 +357,70 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param exerciseID the ID of the Exercise to delete
      */
     public void deleteExercise(int exerciseID) {
-        // Check if there's an image associated with the item to delete. If so, delete the image.
-        // Note: This will ONLY delete an image taken using the "Take Image" button when adding a new
-        // exercise. An image that was already on the device and was added using the "Add Image"
-        // button will remain on the device.
-        // TODO above note will become irrelevant once images that are selected on the device are copied to a directory known to the app
-
+        final String[] args = new String[] {String.valueOf(exerciseID)};
         try (SQLiteDatabase db = this.getWritableDatabase();
              Cursor cursor = db.query(internalGetCurrentTable(), new String[] {IMAGE_NAME},
-                ID + " = ?", new String[] {String.valueOf(exerciseID)},
+                ID + " = ?", args,
                 null, null, null)) {
-            // Check if cursor is empty
-            File filesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File imageFile = cursor.moveToFirst() ? new File(filesDir, cursor.getString(0)) : null;
 
             // Delete the exercise from the table
-            if (db.delete(internalGetCurrentTable(), ID + " = ?", new String[] {String.valueOf(exerciseID)}) > 0) {
-                Log.d("Delete", "Successfully deleted exercise #" + exerciseID);
+            final int affectedRows = db.delete(internalGetCurrentTable(), ID + " = ?", args);
+            if (affectedRows == 1) {
+                Log.d("Delete Exercise", "Successfully deleted exercise #" + exerciseID);
 
-                if (imageFile != null) {
-                    if (imageFile.delete()) {
-                        Log.d("Delete",
-                                "Successfully deleted file at " + imageFile.toString());
-                    } else {
-                        Log.d("Delete",
-                                "Could not delete image file at " + imageFile.toString());
+                if (cursor.moveToFirst()) {
+                    String imagePath = cursor.getString(0);
+                    if (imagePath != null) {
+                        deleteImageFile(imagePath);
                     }
                 }
             } else {
-                Log.d("Delete", "Could not delete exercise #" + exerciseID);
+                Log.d("Delete Exercise", "Could not delete exercise with ID" + exerciseID +
+                        "; Rows affected: " + affectedRows);
             }
         }
     }
 
     /**
+     * Deletes an image saved to the app's image directory.
+     *
+     * @param name of the image
+     */
+    private void deleteImageFile(String name) {
+        File filesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = new File(filesDir, name);
+        if (imageFile.delete()) {
+            Log.d("Delete Image",
+                    "Successfully deleted file at " + imageFile.toString());
+        } else {
+            Log.d("Delete Image",
+                    "Could not delete image file at " + imageFile.toString());
+        }
+    }
+
+    /**
      * Deletes images that were saved to the app's internal storage (i.e. taken
-     * by the camera upon selecting the "Take Photo" button).
+     * by the camera upon selecting the "Take Photo" button) and sets the {@link #IMAGE_NAME}
+     * to null.
      *
      * @param exerciseId the ID of the Exercise whose image should be deleted
      * @param path the path to file to delete
      */
     public void deleteExerciseImage(int exerciseId, String path) {
-        // TODO call this method within deleteExercise() above?
-
-        // Delete the image if possible
-        if (FileUtil.deleteFile(path)) {
-            Log.d("Delete",
-                "Successfully deleted file at " + path);
-        } else {
-            Log.d("Delete",
-                "Could not delete file at " + path);
-        }
+        deleteImageFile(path);
 
         // Delete the file name from the table
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues args = new ContentValues();
-        args.putNull(IMAGE_NAME);
-        db.update(internalGetCurrentTable(), args, ID + " = " + exerciseId, null);
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            ContentValues args = new ContentValues();
+            args.putNull(IMAGE_NAME);
+
+            final int affectedRows = db.update(internalGetCurrentTable(), args,
+                    ID + " = " + exerciseId, null);
+            if (affectedRows != 1) {
+                Log.w("Delete image in table", "Failed to delete image name from table for Exercise with ID: "
+                        + exerciseId + "; Rows affected: " + affectedRows);
+            }
+        }
     }
 
     /**
@@ -421,55 +429,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param exercise the Exercise to update
      */
     public void updateExercise(Exercise exercise) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        final String query = "SELECT * FROM " + internalGetCurrentTable() +
-                " WHERE " + ID + " = " + exercise.getExerciseID() + ";";
-        try (Cursor cursor = db.rawQuery(query, null)) {
-            if (cursor.moveToFirst()) {
-                String name = cursor.getString(NAME_INDEX);
-                String setsAndReps = cursor.getString(SETS_REPS_INDEX);
-                String imageName = cursor.getString(IMAGE_NAME_INDEX);
-
-                String sql = "UPDATE " + internalGetCurrentTable() + " SET ";
-                boolean updateNeeded = false;
-
-                if (!name.equals(exercise.getExerciseName())) {
-                    sql += EXERCISE_NAME + " = '" + exercise.getExerciseName() + "'";
-                    updateNeeded = true;
-                }
-
-                if (!setsAndReps.equals(exercise.getSetsAndReps())) {
-                    if (updateNeeded){
-                        sql += ", " + SETS_REPS + " = '" + exercise.getSetsAndReps() + "'";
-                    } else{
-                        sql += SETS_REPS + " = '" + exercise.getSetsAndReps() + "'";
-                        updateNeeded = true;
-                    }
-                }
-
-                if (imageName != null && exercise.getImageFileName() != null) {
-                    if (!imageName.equals(exercise.getImageFileName())) {
-                        if (updateNeeded) {
-                            sql += ", " + IMAGE_NAME + " = '" + exercise.getImageFileName() + "'";
-                        } else{
-                            sql += IMAGE_NAME + " = '" + exercise.getImageFileName() + "'";
-                            updateNeeded = true;
-                        }
-                    }
-                } else if (imageName == null && exercise.getImageFileName() != null) {
-                    if (updateNeeded) {
-                        sql += ", " + IMAGE_NAME + " = '" + exercise.getImageFileName() + "'";
-                    } else{
-                        sql += IMAGE_NAME + " = '" + exercise.getImageFileName() + "'";
-                        updateNeeded = true;
-                    }
-                }
-
-                if (updateNeeded) {
-                    sql += " WHERE " + ID + " = " + exercise.getExerciseID() + ";";
-                    Log.d("SQL", "" + sql);
-                    db.execSQL(sql);
-                }
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            final String[] args = new String[] { String.valueOf(exercise.getExerciseID()) };
+            ContentValues values = new ContentValues();
+            values.put(EXERCISE_NAME, exercise.getExerciseName());
+            values.put(SETS_REPS, exercise.getSetsAndReps());
+            values.put(IMAGE_NAME, exercise.getImageFileName());
+            final int affectedRows = db.update(internalGetCurrentTable(), values, "ID = ?", args);
+            if (affectedRows != 1) {
+                Log.w("Update Exercise", "Failed to update Exercise with ID "
+                        + exercise.getExerciseID() + "; Rows affected: " + affectedRows);
             }
         }
     }
@@ -483,7 +452,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(WEIGHT_FLAG, exercise.getFlaggedForIncrease());
-        db.update(internalGetCurrentTable(), contentValues, ID + " = ?", new String[] { Integer.toString(exercise.getExerciseID()) });
+        final int affectedRows = db.update(internalGetCurrentTable(), contentValues, ID + " = ?",
+                new String[] { String.valueOf(exercise.getExerciseID()) });
+        if (affectedRows != 1) {
+            Log.w("Update Exercise flag", "Failed to update flag for Exercise with ID "
+                    + exercise.getExerciseID() + "; Rows affected: " + affectedRows);
+        }
     }
 
     /*
@@ -595,167 +569,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /*
-     * The cutting routine below was retrieved from:
-     * https://www.bodybuilding.com/content/ryan-hughes-cutting-program.html
-     */
-    private void createDefaultCuttingTable() {
-        final ArrayList<Exercise> exercises = new ArrayList<>();
-
-        /*
-         * Day 1: Chest
-         */
-        exercises.add(new Exercise("Barbell Bench Press - Medium Grip",
-                "5 sets, 15, 12, 10, 10, 10 reps ",
-                0,
-                Constants.CHEST) );
-        exercises.add(new Exercise("Incline Dumbbell Press",
-                "4 sets, 12, 10, 10, 8 reps ",
-                0,
-                Constants.CHEST) );
-        exercises.add(new Exercise("Dumbbell Flyes",
-                "4 sets, 10, 10, 10, 10 reps",
-                0,
-                Constants.CHEST));
-        exercises.add(new Exercise("Straight-Arm Dumbbell Pullover",
-                "3 sets, 15, 12, 10 reps ",
-                0,
-                Constants.CHEST) );
-        exercises.add(new Exercise("Butterfly",
-                "4 sets, 12, 12, 12, 12 reps",
-                0,
-                Constants.CHEST) );
-
-        /*
-         * Day 2: Quads/Calves
-         *  &
-         * Day 6: Calves/Hamstrings
-         */
-        exercises.add(new Exercise("Standing Calf Raises",
-                "3 sets, 60, 60, 60 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Seated Calf Raise",
-                "3 sets, 60, 60, 60 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Leg Extensions",
-                "5 sets, 15, 12, 12, 10, 10 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Barbell Squat",
-                "5 sets, 20, 15, 12, 10, 10 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Leg Press",
-                "4 sets, 15, 12, 12, 10 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Smith Machine Squat",
-                "3 sets, 15, 15, 15 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Seated Leg Curl",
-                "4 sets, 12, 10, 10, 10 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Stiff-Legged Barbell Deadlift",
-                "4 sets, 15, 12, 12, 10 reps",
-                0,
-                Constants.LEGS) );
-        exercises.add(new Exercise("Dumbbell Lunges",
-                "3 sets, 20 steps",
-                0,
-                Constants.LEGS) );
-
-        /*
-         * Day 3: Back
-         */
-        exercises.add(new Exercise("Wide-Grip Lat Pulldown",
-                "4 sets, 12, 10, 10, 10 reps",
-                0,
-                Constants.BACK) );
-        exercises.add(new Exercise("Seated Cable Rows",
-                "4 sets, 15, 12, 10, 10 reps",
-                0,
-                Constants.BACK) );
-        exercises.add(new Exercise("Bent Over Barbell Row",
-                "4 sets, 15, 12, 10, 8 reps",
-                0,
-                Constants.BACK) );
-        exercises.add(new Exercise("One-Arm Dumbbell Row",
-                "4 sets, 15, 10, 10, 8 reps",
-                0,
-                Constants.BACK) );
-
-
-        /*
-         * Day 4: Shoulders
-         */
-        exercises.add(new Exercise("Standing Military Press",
-                "4 sets, 12, 10, 8, 8 reps",
-                0,
-                Constants.SHOULDERS) );
-        exercises.add(new Exercise("Dumbbell Bench Press",
-                "4 sets, 10, 10, 8, 8 reps",
-                0,
-                Constants.SHOULDERS) );
-        exercises.add(new Exercise("Barbell Shrug",
-                "4 sets, 15, 12, 12, 10 reps",
-                0,
-                Constants.SHOULDERS) );
-        exercises.add(new Exercise("Smith Machine Shrug",
-                "3 sets, 12, 12, 12 reps",
-                0,
-                Constants.SHOULDERS) );
-        exercises.add(new Exercise("Side Lateral Raise",
-                "3 sets, 12, 10, 8 reps per side",
-                0,
-                Constants.SHOULDERS) );
-        exercises.add(new Exercise("Front Plate Raise",
-                "3 sets, 12, 10, 8 reps (25, 35, 45)",
-                0,
-                Constants.SHOULDERS) );
-
-
-        /*
-         * Day 5: Arms
-         */
-        exercises.add(new Exercise("Barbell Curl",
-                "4 sets, 12, 10, 10, 8 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("Dumbbell Alternate Bicep Curl",
-                "4 sets, 12, 10, 8, 8 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("Standing Dumbbell Reverse Curl",
-                "4 sets, 12, 10, 10, 8 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("One Arm Dumbbell Preacher Curl",
-                "3 sets, 12, 12, 12 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("Dumbbell One-Arm Triceps Extension",
-                "4 sets, 12, 10, 10, 8 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("Weighted Bench Dip",
-                "4 sets, 15, 12, 12, 10 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("Lying Triceps Press",
-                "4 sets, 15, 10, 10, 8 reps",
-                0,
-                Constants.ARMS) );
-        exercises.add(new Exercise("Triceps Pushdown",
-                "3 sets, 12, 12, 10 reps",
-                0,
-                Constants.ARMS) );
-
-        for (Exercise exercise : exercises) {
-            addExercise(exercise);
-        }
-    }
 }

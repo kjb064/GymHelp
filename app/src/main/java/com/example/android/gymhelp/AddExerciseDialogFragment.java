@@ -371,13 +371,14 @@ public class AddExerciseDialogFragment extends DialogFragment {
         Activity activity = getActivity();
         if (activity != null) {
             // TODO DATA is deprecated...
-            String[] projection = {MediaStore.Images.Media.DATA};
-            try (Cursor cursor = activity.managedQuery(uri, projection, null,
-                    null, null)) {
-                activity.startManagingCursor(cursor);
-                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                cursor.moveToFirst();
-                return cursor.getString(columnIndex);
+            String[] projection = { MediaStore.Images.Media.DATA };
+
+            try (Cursor cursor = activity.getContentResolver().query(uri, projection,
+                    null, null, null)) {
+                if (cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    return cursor.getString(columnIndex);
+                }
             }
         }
         return null;
