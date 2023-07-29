@@ -16,6 +16,7 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+    // TODO: Determine if it would be better to not close and re-open database connection for each operation
     // TODO: Check for duplicates when inserting new exercise (do this before passing to DB helper...?)
 
     private final Context context;
@@ -136,12 +137,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              Cursor c = db.query("sqlite_master", new String[] {"name"}, "type = ?",
                      new String[] {"'table'"}, null, null, null)) {
             if (c.moveToFirst()) {
-                while (!c.isAfterLast()) {
-                    String name = c.getString(c.getColumnIndex("name"));
-                    if (!name.contentEquals("android_metadata") && !name.contentEquals("sqlite_sequence")) {
-                        tableNames.add(name);
+                final int columnIndex = c.getColumnIndex("name");
+                if (columnIndex > -1) {
+                    while (!c.isAfterLast()) {
+                        String name = c.getString(columnIndex);
+                        if (!name.contentEquals("android_metadata") && !name.contentEquals("sqlite_sequence")) {
+                            tableNames.add(name);
+                        }
+                        c.moveToNext();
                     }
-                    c.moveToNext();
                 }
             }
         }
@@ -228,13 +232,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @return Cursor to access the query results
      */
     public Cursor getQuerySuggestions(String searchText) {
-        try (SQLiteDatabase db = this.getReadableDatabase()) {
-            return db.query(internalGetCurrentTable(), new String[] {"rowid _id", EXERCISE_NAME},
-                    EXERCISE_NAME + " LIKE '%?%';", new String[] {searchText},
-                    null, null, null);
-//            return db.rawQuery("SELECT rowid _id, " + EXERCISE_NAME + " FROM " + internalGetCurrentTable() +
-//                    " WHERE " + EXERCISE_NAME + " LIKE '%" + searchText + "%';", null);
-        }
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Don't close the database connection since doing so will close the Cursor returned
+        return db.query(internalGetCurrentTable(), new String[] { "rowid _id", EXERCISE_NAME },
+                EXERCISE_NAME + " LIKE ?", new String[] { "%" + searchText + "%" },
+                null, null, null);
     }
 
     private Exercise createExerciseFromQueryResults(Cursor cursor) {
@@ -263,7 +266,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<Exercise> getSelectedExercises(int targetID, SortType sortType) {
         ArrayList<Exercise> exercises = new ArrayList<>();
         if (isValidTargetID(targetID)) {
-            String orderBy = sortType != null ? EXERCISE_NAME + " COLLATE NOCASE " + sortType.toString() : null;
+            String orderBy = sortType != null ? EXERCISE_NAME + " COLLATE NOCASE " + sortType : null;
             try (SQLiteDatabase db = this.getReadableDatabase();
                  Cursor cursor = db.query(internalGetCurrentTable(), null, EXERCISE_TARGET + " = ?",
                     new String[] { String.valueOf(targetID) }, null, null, orderBy)) {
@@ -391,10 +394,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         File imageFile = new File(filesDir, name);
         if (imageFile.delete()) {
             Log.d("Delete Image",
-                    "Successfully deleted file at " + imageFile.toString());
+                    "Successfully deleted file at " + imageFile);
         } else {
             Log.d("Delete Image",
-                    "Could not delete image file at " + imageFile.toString());
+                    "Could not delete image file at " + imageFile);
         }
     }
 

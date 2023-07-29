@@ -1,8 +1,8 @@
 package com.example.android.gymhelp;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +15,8 @@ import android.widget.TextView;
  */
 public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
 
+    private static final String EXERCISE_PARCEL_KEY = "Exercise";
+
     /**
      * Creates a new EditExerciseDialogFragment with the given title and Exercise as arguments.
      *
@@ -26,8 +28,8 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
         EditExerciseDialogFragment dialogFragment = new EditExerciseDialogFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putString("Title", title);
-        bundle.putParcelable("Exercise", exercise);
+        bundle.putString(TITLE_PARCEL_KEY, title);
+        bundle.putParcelable(EXERCISE_PARCEL_KEY, exercise);
         dialogFragment.setArguments(bundle);
 
         return dialogFragment;
@@ -55,7 +57,7 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
             // Set fields using data obtained from Exercise
             Bundle bundle = getArguments();
             if (bundle != null) {
-                Exercise exercise = bundle.getParcelable("Exercise");
+                Exercise exercise = bundle.getParcelable(EXERCISE_PARCEL_KEY);
                 if (exercise.hasImage()) {
                     checkBox.setChecked(true);
                     photoPathTextView.setText(exercise.getImageFileName());
@@ -82,7 +84,7 @@ public class EditExerciseDialogFragment extends AddExerciseDialogFragment {
     protected void submitExercise(String name, String setsReps, String imageFileName) {
         Bundle bundle = getArguments();
         if (bundle != null) {
-            Exercise exercise = bundle.getParcelable("Exercise");
+            Exercise exercise = bundle.getParcelable(EXERCISE_PARCEL_KEY);
 
             exercise.setExerciseName(name);
             exercise.setSetsAndReps(setsReps);

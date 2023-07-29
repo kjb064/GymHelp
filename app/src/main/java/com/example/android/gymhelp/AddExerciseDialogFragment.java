@@ -9,12 +9,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -39,6 +39,9 @@ import java.util.Locale;
  * DialogFragment for the "Add Exercise" dialog.
  */
 public class AddExerciseDialogFragment extends DialogFragment {
+
+    protected static final String TITLE_PARCEL_KEY = "Title";
+
     protected EditText nameEditText;
     protected EditText setsRepsEditText;
 
@@ -58,7 +61,7 @@ public class AddExerciseDialogFragment extends DialogFragment {
         AddExerciseDialogFragment dialogFragment = new AddExerciseDialogFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putString("Title", title);
+        bundle.putString(TITLE_PARCEL_KEY, title);
         dialogFragment.setArguments(bundle);
 
         return dialogFragment;
@@ -71,7 +74,7 @@ public class AddExerciseDialogFragment extends DialogFragment {
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            String title = arguments.getString("Title");
+            String title = arguments.getString(TITLE_PARCEL_KEY);
             TextView titleTextView = dialogLayout.findViewById(R.id.title_text_view);
             titleTextView.setText(title);
         }
@@ -231,7 +234,7 @@ public class AddExerciseDialogFragment extends DialogFragment {
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
-            new android.support.v7.app.AlertDialog.Builder(activity)
+            new androidx.appcompat.app.AlertDialog.Builder(activity)
                     .setTitle("Permission needed")
                     .setMessage("Permission is required to access images saved to this device.")
                     .setPositiveButton("Accept", (dialog, which) -> ActivityCompat.requestPermissions(activity,
